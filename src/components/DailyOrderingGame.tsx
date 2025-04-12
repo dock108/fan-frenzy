@@ -13,6 +13,7 @@ import {
 import ResultsModal from './ResultsModal';
 import SocialShareButtons from './SocialShareButtons';
 import { LockClosedIcon } from '@heroicons/react/20/solid';
+import ChallengeModal from './ChallengeModal';
 
 interface Moment {
   index: number;
@@ -25,9 +26,10 @@ interface Moment {
 interface DailyOrderingGameProps {
   title: string;
   questions: Moment[];
+  gameId: string;
 }
 
-const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions }) => {
+const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions, gameId }) => {
   const startMoment = questions.find(q => q.type === 'start');
   const endMoment = questions.find(q => q.type === 'end');
   const initialOrderableMoments = useMemo(() => 
@@ -43,6 +45,7 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isChallengeModalOpen, setIsChallengeModalOpen] = useState(false);
 
   // Chances State
   const [guessesRemaining, setGuessesRemaining] = useState(3);
@@ -175,6 +178,10 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
 
   // Modal Close Handler
   const handleCloseModal = () => setIsModalOpen(false);
+  const handleCloseChallengeModal = () => setIsChallengeModalOpen(false);
+  const handleChallengeSubmitSuccess = () => {
+    console.log('Challenge submitted successfully');
+  };
 
   // --- Corrected JSX Structure --- 
   return (
@@ -302,29 +309,45 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
                   )}
                 </div>
               ) : (
-                <div className="space-y-2">
-                    {isCorrect ? (
-                        <p className="text-lg font-semibold text-green-600">
-                            Perfect Order!
-                            {guessesRemaining === 2 ? (
-                                ` (${formatTime(elapsedTime)} on first guess)`
-                            ) : (
-                                ` (in ${3 - guessesRemaining} guesses)`
-                            )}
-                        </p>
-                    ) : (
-                        <p className="text-lg font-semibold text-orange-600">Game Over!</p>
-                    )}
-                    <p className="text-2xl font-bold text-gray-800">
-                         Final Score: {score} / {maxScore}
-                    </p>
+                <div className="space-y-4">
+                    {/* Final Score Display */} 
+                    <div className="space-y-1">
+                      {isCorrect ? (
+                          <p className="text-lg font-semibold text-green-600">
+                              Perfect Order!
+                              {guessesRemaining === 2 ? (
+                                  ` (${formatTime(elapsedTime)} on first guess)`
+                              ) : (
+                                  ` (in ${3 - guessesRemaining} guesses)`
+                              )}
+                          </p>
+                      ) : (
+                          <p className="text-lg font-semibold text-orange-600">Game Over!</p>
+                      )}
+                      <p className="text-2xl font-bold text-gray-800">
+                           Final Score: {score} / {maxScore}
+                      </p>
+                    </div>
+                    
+                    {/* Social Share */} 
                     <SocialShareButtons score={score} maxScore={maxScore} title={title} />
-                     <button
-                         onClick={() => setIsModalOpen(true)}
-                         className="mt-3 text-xs text-gray-500 hover:underline"
-                     >
-                         (Show Results Pop-up)
-                     </button>
+                    
+                    {/* Controls for Modals */} 
+                    <div className="flex justify-center items-center space-x-4 pt-2">
+                      <button
+                          onClick={() => setIsModalOpen(true)}
+                          className="text-xs text-gray-500 hover:underline"
+                      >
+                          (Show Results Pop-up)
+                      </button>
+                      {/* Challenge Flag Button */} 
+                      <button
+                          onClick={() => setIsChallengeModalOpen(true)}
+                          className="text-xs text-red-600 hover:text-red-800 hover:underline"
+                      >
+                          (Challenge this Game?)
+                      </button>
+                    </div>
                 </div>
               )}
             </div>
@@ -340,7 +363,20 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
             isPerfect={isCorrect}
             elapsedTime={isCorrect && guessesRemaining === 2 ? elapsedTime : undefined}
             guessesTaken={isCorrect ? 3 - guessesRemaining : undefined}
+            gameId={gameId}
+            onOpenChallengeModal={() => setIsChallengeModalOpen(true)}
         />
+        
+        {/* Challenge Modal */} 
+        {startMoment && (
+            <ChallengeModal
+                isOpen={isChallengeModalOpen}
+                onClose={handleCloseChallengeModal}
+                gameId={gameId}
+                momentIndex={-1}
+                onSubmitSuccess={handleChallengeSubmitSuccess}
+            />
+        )}
     </> 
   );
 };

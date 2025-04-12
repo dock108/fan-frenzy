@@ -174,6 +174,7 @@ function DailyChallengeContent() {
         <div className="lg:col-span-2">
           <DailyOrderingGame 
             key={challengeData.id} // Use challenge ID as key
+            gameId={challengeData.id} // Pass the gameId
             questions={challengeData.questions} 
             title={challengeData.title} // Pass title to game component IF needed by modal
           />
@@ -191,15 +192,13 @@ function DailyChallengeContent() {
 export default function DailyPage() {
   return (
     <TransitionLayout showHeader={false} showFooter={true}>
-      <div className="relative">
-        {/* Home Icon */}
+      <div className="relative min-h-screen flex flex-col">
+        {/* Icons & Logo positioned absolutely */}
         <div className="absolute top-4 left-4 z-20">
           <Link href="./" className="text-gray-600 hover:text-yellow-500 p-1 rounded-md hover:bg-gray-100" aria-label="Go Home">
             <HomeIcon className="h-6 w-6" />
           </Link>
         </div>
-        
-        {/* Logo - Resized */}
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
           <Link href="./">
             <Image 
@@ -213,8 +212,8 @@ export default function DailyPage() {
           </Link>
         </div>
 
-        {/* Main Content Area */}
-        <div className="pt-20">
+        {/* Main Content Area - Added background and flex-grow */}
+        <div className="pt-20 flex-grow bg-gray-50">
           <AdminDateSelector />
           <Suspense fallback={<div className="flex items-center justify-center p-10 text-gray-600"><ArrowPathIcon className="h-8 w-8 animate-spin mr-2" /> Loading...</div>} >
             <DailyChallengeContent />

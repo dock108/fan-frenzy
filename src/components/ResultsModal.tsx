@@ -25,6 +25,8 @@ interface ResultsModalProps {
   isPerfect: boolean | null;
   elapsedTime?: number; // Time in seconds, only if perfect first guess
   guessesTaken?: number; // Number of guesses if perfect (but not first guess)
+  gameId: string; // Add gameId
+  onOpenChallengeModal: () => void; // Add handler to open challenge modal
 }
 
 const ResultsModal: React.FC<ResultsModalProps> = ({
@@ -35,7 +37,9 @@ const ResultsModal: React.FC<ResultsModalProps> = ({
   title,
   isPerfect,
   elapsedTime,
-  guessesTaken
+  guessesTaken,
+  gameId,
+  onOpenChallengeModal
 }) => {
 
   return (
@@ -51,7 +55,8 @@ const ResultsModal: React.FC<ResultsModalProps> = ({
           leaveTo="opacity-0"
           as="div"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75" /> {/* Lighter Overlay */}
+          {/* Updated Overlay for foggy effect */}
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
         </Transition.Child>
 
         {/* Modal Content */}
@@ -90,14 +95,26 @@ const ResultsModal: React.FC<ResultsModalProps> = ({
                   <SocialShareButtons score={score} maxScore={maxScore} title={title} />
                 </div>
 
-                {/* Close Button */}
-                <div className="mt-6 text-center">
+                {/* Close Button & Challenge Button Wrapper - Stacked Vertically */}
+                <div className="mt-6 text-center flex flex-col items-center space-y-3">
+                  {/* Dismiss Button (Keep styling) */}
                   <button
                     type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    className="w-full max-w-xs inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     onClick={onClose}
                   >
                     Dismiss
+                  </button>
+                  {/* Challenge Button - Red Styling */}
+                  <button
+                    type="button"
+                    className="w-full max-w-xs inline-flex justify-center rounded-md border border-red-300 bg-red-100 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                    onClick={() => {
+                      onClose(); // Close results modal first
+                      onOpenChallengeModal(); // Then open challenge modal
+                    }}
+                  >
+                    Challenge this Game?
                   </button>
                 </div>
 

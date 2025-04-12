@@ -5,16 +5,17 @@ import { NextResponse } from 'next/server';
 // Define the expected request body structure
 interface SubmitChallengePayload {
   gameId: string;
-  momentIndex: number;
+  momentIndex: number | null;
   reason: string;
   comment?: string;
 }
 
 // Define allowed reasons
 const ALLOWED_REASONS = [
-  'Wrong Focus',
-  'Better Moment Available',
-  'Ambiguous Wording',
+  'Incorrect Answer/Order',
+  'Ambiguous Wording/Context',
+  'Incorrect Player/Team Info',
+  'Technical Bug',
   'Other'
 ];
 
@@ -61,9 +62,10 @@ export async function POST(request: Request) {
 
     if (
       typeof gameId !== 'string' || !gameId ||
-      typeof momentIndex !== 'number' || momentIndex < 0 ||
+      (momentIndex !== null && typeof momentIndex !== 'number') ||
+      (typeof momentIndex === 'number' && momentIndex < -1) ||
       typeof reason !== 'string' || !ALLOWED_REASONS.includes(reason) ||
-      (comment && typeof comment !== 'string') // Optional comment must be string if present
+      (comment && typeof comment !== 'string')
     ) {
       return NextResponse.json({ message: 'Invalid payload structure or values' }, { status: 400 });
     }
@@ -74,8 +76,7 @@ export async function POST(request: Request) {
       game_id: gameId,
       moment_index: momentIndex,
       reason: reason,
-      comment: comment || null, // Ensure comment is null if empty/undefined
-      // created_at is handled by Supabase default
+      comment: comment || null,
     };
 
     // 4. Insert into Supabase

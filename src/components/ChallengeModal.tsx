@@ -7,15 +7,16 @@ interface ChallengeModalProps {
   isOpen: boolean;
   onClose: () => void;
   gameId: string;
-  momentIndex: number;
+  momentIndex: number | null; // Allow null for general challenges
   onSubmitSuccess: () => void; // Callback on successful submission
 }
 
 const challengeReasons = [
-  'Wrong Focus',
-  'Better Moment Available',
-  'Ambiguous Wording',
-  'Other'
+  'Incorrect Answer/Order',        // General issue
+  'Ambiguous Wording/Context',  // Content clarity
+  'Incorrect Player/Team Info', // Factual error
+  'Technical Bug',               // Site functionality
+  'Other'                         // Catch-all
 ];
 
 export default function ChallengeModal({
@@ -37,9 +38,9 @@ export default function ChallengeModal({
 
     const payload = {
       gameId,
-      momentIndex,
+      momentIndex: momentIndex === -1 ? null : momentIndex, // Send null if general challenge
       reason,
-      comment: comment.trim() || undefined, // Send undefined if empty
+      comment: comment.trim() || undefined,
     };
 
     try {
@@ -89,7 +90,7 @@ export default function ChallengeModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -108,7 +109,7 @@ export default function ChallengeModal({
                   as="h3"
                   className="text-lg font-medium leading-6 text-gray-900"
                 >
-                  Challenge This Moment
+                  {momentIndex === -1 ? 'Challenge This Game' : 'Challenge This Moment'}
                 </Dialog.Title>
                 <form onSubmit={handleSubmit} className="mt-4 space-y-4">
                   <div>
@@ -120,7 +121,7 @@ export default function ChallengeModal({
                       name="reason"
                       value={reason}
                       onChange={(e) => setReason(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                      className="appearance-none mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                     >
                       {challengeReasons.map((r) => (
                         <option key={r} value={r}>{r}</option>
@@ -130,15 +131,16 @@ export default function ChallengeModal({
 
                   <div>
                     <label htmlFor="comment" className="block text-sm font-medium text-gray-700">
-                      Optional Comment
+                      Optional Comment (max 250 chars)
                     </label>
                     <textarea
                       id="comment"
                       name="comment"
                       rows={3}
+                      maxLength={250}
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border-gray-300 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       placeholder="Provide more details (optional)"
                     />
                   </div>
@@ -150,7 +152,7 @@ export default function ChallengeModal({
                   <div className="mt-6 flex justify-end space-x-3">
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                      className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                       onClick={handleClose}
                     >
                       Cancel
@@ -158,7 +160,7 @@ export default function ChallengeModal({
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:bg-gray-400"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? 'Submitting...' : 'Submit Challenge'}
                     </button>

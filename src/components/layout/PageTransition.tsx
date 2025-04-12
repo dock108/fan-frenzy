@@ -48,6 +48,7 @@ const PageTransition = ({
       animate={variant.animate}
       exit={variant.exit}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
+      className="bg-gray-50 min-h-full"
     >
       {children}
     </motion.div>
