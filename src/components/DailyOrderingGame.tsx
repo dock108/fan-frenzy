@@ -360,10 +360,9 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions,
             score={score}
             maxScore={maxScore}
             title={title} 
-            isPerfect={isCorrect}
+            isPerfect={isCorrect ?? undefined}
             elapsedTime={isCorrect && guessesRemaining === 2 ? elapsedTime : undefined}
             guessesTaken={isCorrect ? 3 - guessesRemaining : undefined}
-            gameId={gameId}
             onOpenChallengeModal={() => setIsChallengeModalOpen(true)}
         />
         
