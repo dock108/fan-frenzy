@@ -4,11 +4,12 @@ import React, { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import Cookies from 'js-cookie'
 import TransitionLayout from '@/components/layout/TransitionLayout'
 import AdminDateSelector from '@/components/AdminDateSelector'
 import DailyOrderingGame from '@/components/DailyOrderingGame'
 import ScoringGuide from '@/components/ScoringGuide'
-import { ArrowPathIcon, XCircleIcon, HomeIcon } from '@heroicons/react/24/solid'
+import { ArrowPathIcon, XCircleIcon, HomeIcon, CheckCircleIcon } from '@heroicons/react/24/solid'
 
 // Simplified type definitions
 interface Moment { // Define Moment type if not imported globally
@@ -33,6 +34,8 @@ interface OrderChallenge extends ChallengeBase { questions: Moment[]; }
 
 type Challenge = OrderChallenge; // Only OrderChallenge
 
+const COOKIE_NAME = 'played_daily_challenge';
+
 function DailyChallengeContent() {
   const searchParams = useSearchParams()
   const adminDate = searchParams.get('adminDate')
@@ -40,8 +43,17 @@ function DailyChallengeContent() {
   const [challengeData, setChallengeData] = useState<Challenge | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [hasPlayedToday, setHasPlayedToday] = useState<boolean>(false);
 
   useEffect(() => {
+    const playedCookie = Cookies.get(COOKIE_NAME);
+    if (playedCookie === 'true' && !adminDate) {
+      setHasPlayedToday(true);
+      setIsLoading(false);
+      return;
+    }
+    setHasPlayedToday(false);
+
     const fetchChallenge = async () => {
       setIsLoading(true)
       setError(null)
@@ -87,6 +99,16 @@ function DailyChallengeContent() {
     return (
       <div className="flex items-center justify-center p-10 text-gray-600">
         <ArrowPathIcon className="h-8 w-8 animate-spin mr-2" /> Loading Challenge...
+      </div>
+    )
+  }
+
+  if (hasPlayedToday) {
+    return (
+      <div className="p-6 text-center text-blue-700 bg-blue-50 rounded-lg shadow-sm border border-blue-200 max-w-md mx-auto">
+        <CheckCircleIcon className="h-10 w-10 mx-auto text-blue-500 mb-3" />
+        <p className="font-semibold mb-1">Already Played Today!</p>
+        <p className="text-sm">You have completed today's challenge. Come back tomorrow for a new one!</p>
       </div>
     )
   }

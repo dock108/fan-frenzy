@@ -6,6 +6,7 @@ import Image from 'next/image'
 import toast from 'react-hot-toast';
 import TransitionLayout from '@/components/layout/TransitionLayout';
 import { ArrowPathIcon, XCircleIcon, HomeIcon } from '@heroicons/react/24/solid';
+import Cookies from 'js-cookie';
 
 interface MomentBase {
   index: number;
@@ -38,6 +39,15 @@ const answerVariations: { [key: string]: string[] } = {
   'home run': ['homer'],
   // Add more canonical answers and their variations here
   // Example: 'interception': ['pick', 'picked off'],
+};
+
+const COOKIE_NAME = 'played_daily_challenge';
+
+// Function to calculate expiry date (next midnight)
+const getExpiryDate = () => {
+  const now = new Date();
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return tomorrow;
 };
 
 export default function PlayPage() {
@@ -107,7 +117,6 @@ export default function PlayPage() {
   const saveScoreAPI = useCallback(async (finalScore: number, correctCount: number, totalQuestions: number) => {
     if (!gameData || scoreHasBeenSaved.current || isSaving) return;
     
-    // Don't attempt to save if player name is empty
     if (!playerName.trim()) {
       return;
     }
@@ -138,6 +147,10 @@ export default function PlayPage() {
       toast.success('Score saved successfully!');
       scoreHasBeenSaved.current = true;
       setSaveError(null);
+
+      // Set the cookie after successful save
+      Cookies.set(COOKIE_NAME, 'true', { expires: getExpiryDate() });
+
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to save score';
       console.error("Save score error:", message);
