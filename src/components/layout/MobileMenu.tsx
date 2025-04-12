@@ -1,93 +1,102 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import ThemeToggle from '@/components/ThemeToggle';
+import Image from 'next/image';
 
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
-  const pathname = usePathname();
-  
-  // Close menu when route changes
-  useEffect(() => {
-    onClose();
-  }, [pathname, onClose]);
-  
-  // Close menu when ESC key is pressed
-  useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    
-    if (isOpen) {
-      window.addEventListener('keydown', handleEsc);
-    }
-    
-    return () => {
-      window.removeEventListener('keydown', handleEsc);
-    };
-  }, [isOpen, onClose]);
-  
-  if (!isOpen) return null;
-  
+const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
+  const { user, signOut } = useAuth();
+
   return (
-    <div className="md:hidden fixed inset-0 z-50 bg-gray-800 bg-opacity-75 backdrop-blur-sm" onClick={onClose}>
-      <div className="absolute right-0 top-0 h-full w-64 bg-white dark:bg-gray-800 shadow-xl p-4" onClick={(e) => e.stopPropagation()}>
-        <div className="flex justify-between items-center mb-6">
-          <p className="font-semibold text-lg text-teamPrimary">Menu</p>
-          <button 
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50 md:hidden" onClose={onClose}>
+        {/* Overlay */}
+        <Transition.Child
+          as={Fragment}
+          enter="transition-opacity ease-linear duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="transition-opacity ease-linear duration-300"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 z-40 flex">
+          <Transition.Child
+            as={Fragment}
+            enter="transition ease-in-out duration-300 transform"
+            enterFrom="-translate-x-full"
+            enterTo="translate-x-0"
+            leave="transition ease-in-out duration-300 transform"
+            leaveFrom="translate-x-0"
+            leaveTo="-translate-x-full"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-white dark:bg-gray-800 pb-12 shadow-xl">
+              {/* Close Button & Header */}
+              <div className="flex items-center justify-between px-4 pt-5 pb-2 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center space-x-2">
+                   <Image 
+                     src="/images/icon.png"
+                     alt="FanFrenzy Icon" 
+                     width={28}
+                     height={28}
+                   />
+                   <Dialog.Title className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                      Menu
+                   </Dialog.Title>
+                </div>
+                <button
+                  type="button"
+                  className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 dark:text-gray-300"
+                  onClick={onClose}
+                  aria-label="Close menu"
+                >
+                  <span className="sr-only">Close menu</span>
+                  <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                </button>
+              </div>
+
+              {/* Links */}
+              <div className="mt-6 space-y-2 px-4">
+                <Link href="/daily" className="block rounded-md py-2 px-3 text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={onClose}>Daily Challenge</Link>
+                <Link href="/rewind" className="block rounded-md py-2 px-3 text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={onClose}>Team Rewind</Link>
+                <Link href="/shuffle" className="block rounded-md py-2 px-3 text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={onClose}>Shuffle Mode</Link>
+                <Link href="/leaderboard" className="block rounded-md py-2 px-3 text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={onClose}>Leaderboard</Link>
+              </div>
+
+              {/* Auth Links / Theme Toggle */}
+              <div className="mt-auto border-t border-gray-200 dark:border-gray-700 pt-6 pb-4 px-4 space-y-4">
+                 <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-300">Theme</span>
+                    <ThemeToggle />
+                 </div>
+                 {user ? (
+                   <button onClick={() => { signOut(); onClose(); }} className="w-full text-left block rounded-md py-2 px-3 text-base font-medium text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                     Sign Out
+                   </button>
+                 ) : (
+                   <Link href="/login" className="block rounded-md py-2 px-3 text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700" onClick={onClose}>
+                     Sign In / Sign Up
+                   </Link>
+                 )}
+              </div>
+            </Dialog.Panel>
+          </Transition.Child>
         </div>
-        
-        <nav className="flex flex-col space-y-4">
-          <Link 
-            href="/" 
-            className={`px-4 py-2 rounded-md ${pathname === '/' ? 'bg-teamOverlay text-teamPrimary' : 'text-gray-600 dark:text-gray-300'} hover:bg-teamOverlay hover:text-teamPrimary transition-colors`}
-          >
-            Home
-          </Link>
-          <Link 
-            href="/daily" 
-            className={`px-4 py-2 rounded-md ${pathname === '/daily' ? 'bg-teamOverlay text-teamPrimary' : 'text-gray-600 dark:text-gray-300'} hover:bg-teamOverlay hover:text-teamPrimary transition-colors`}
-          >
-            Daily Challenge
-          </Link>
-          <Link 
-            href="/rewind" 
-            className={`px-4 py-2 rounded-md ${pathname === '/rewind' ? 'bg-teamOverlay text-teamPrimary' : 'text-gray-600 dark:text-gray-300'} hover:bg-teamOverlay hover:text-teamPrimary transition-colors`}
-          >
-            Team Rewind
-          </Link>
-          <Link 
-            href="/shuffle" 
-            className={`px-4 py-2 rounded-md ${pathname === '/shuffle' ? 'bg-teamOverlay text-teamPrimary' : 'text-gray-600 dark:text-gray-300'} hover:bg-teamOverlay hover:text-teamPrimary transition-colors`}
-          >
-            Shuffle Mode
-          </Link>
-          <Link 
-            href="/leaderboard" 
-            className={`px-4 py-2 rounded-md ${pathname === '/leaderboard' ? 'bg-teamOverlay text-teamPrimary' : 'text-gray-600 dark:text-gray-300'} hover:bg-teamOverlay hover:text-teamPrimary transition-colors`}
-          >
-            Leaderboard
-          </Link>
-          <Link 
-            href="/theme-demo" 
-            className={`px-4 py-2 rounded-md ${pathname === '/theme-demo' ? 'bg-teamOverlay text-teamPrimary' : 'text-gray-600 dark:text-gray-300'} hover:bg-teamOverlay hover:text-teamPrimary transition-colors`}
-          >
-            Theme Demo
-          </Link>
-        </nav>
-      </div>
-    </div>
+      </Dialog>
+    </Transition.Root>
   );
-} 
+};
+
+export default MobileMenu; 
