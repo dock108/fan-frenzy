@@ -52,18 +52,18 @@ The homepage (`/`) serves as the main entry point:
 
 - **Static Data:** The current version uses static data from `src/data/daily-challenge.json` to simulate the game.
 - **Gameplay Format:** Fill-in-the-Blanks
-  - Users are shown the context of a starting moment and an ending moment from a specific game.
-  - Between these, a series of prompts are displayed, asking for key details (player name, play type, result, etc.) that occurred between the start and end points.
-  - Users type their answers into input fields for each prompt.
-  - After filling in the blanks, users click "Submit Guesses".
+- **Gameplay Format:** Reactive Fill-in-the-Blanks
+    - Users are shown the context of a starting moment and an ending moment from a specific game.
+    - Between these, a series of prompts are displayed, asking for key details (player name, play type, result, etc.) that occurred between the start and end points.
+    - Users type their answers into input fields for each prompt.
+    - **Reactive Feedback:** Input fields automatically lock with a green style upon an exact, case-insensitive match.
+    - If a user types a partial match (contains the answer but isn't exact) and pauses, a feedback message appears below the field prompting for more specificity.
+    - The game finishes automatically when all fields are locked.
 - **Grading & Summary:**
   - User inputs are compared against the correct answers (case-insensitive).
   - The summary screen shows which answers were correct/incorrect and displays the correct answer for any misses.
-- **Scoring:**
-  - Points are awarded based on the importance score of correctly answered moments.
-  - A small bonus is added for each correct answer.
-  - Logged-in users have their final score saved to the `scores` table in Supabase.
-- **Summary:** After the final moment, a summary screen displays the total score, number correct, and highlights any high-importance moments the user missed.
+- **Scoring:** Points are awarded incrementally as each field is correctly locked, based on the moment's importance score.
+- **Summary:** The summary screen displays the final score and a recap of the correct answers for each prompt.
 
 ### Authentication
 

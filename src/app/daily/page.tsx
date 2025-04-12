@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import dailyChallengeData from '@/data/daily-challenge.json'
 import { supabase } from '@/utils/supabase'
@@ -31,53 +31,123 @@ interface GameData {
   moments: Moment[];
 }
 
+const DEBOUNCE_DELAY = 1500; // ms
+
 export default function DailyChallengePage() {
   const { user, loading: authLoading } = useAuth()
   const [gameData, setGameData] = useState<GameData | null>(null)
   const [userInputs, setUserInputs] = useState<string[]>([])
   const [isFinished, setIsFinished] = useState(false)
-  const [results, setResults] = useState<boolean[]>([]) // Store correctness for each blank
+  const [lockedStates, setLockedStates] = useState<boolean[]>([])
+  const [feedbackMessages, setFeedbackMessages] = useState<string[]>([])
   const [score, setScore] = useState(0)
+  const debounceTimers = useRef<(NodeJS.Timeout | number | null)[]>([]); // Ref to store timer IDs
 
   const fillInMoments = gameData?.moments.filter(m => m.type === 'fill-in') as FillInMoment[] || [];
   const startMoment = gameData?.moments.find(m => m.type === 'start') as StartEndMoment | undefined;
   const endMoment = gameData?.moments.find(m => m.type === 'end') as StartEndMoment | undefined;
 
   useEffect(() => {
-    setGameData(dailyChallengeData as GameData)
-  }, [])
+    // Load static data and initialize dependent states together
+    const loadedGameData = dailyChallengeData as GameData;
+    setGameData(loadedGameData);
 
-  useEffect(() => {
-    if (fillInMoments.length > 0) {
-      setUserInputs(Array(fillInMoments.length).fill(''))
-      setResults(Array(fillInMoments.length).fill(false))
+    const loadedFillInMoments = loadedGameData.moments.filter(m => m.type === 'fill-in') as FillInMoment[];
+    if (loadedFillInMoments.length > 0) {
+      setUserInputs(Array(loadedFillInMoments.length).fill(''));
+      setLockedStates(Array(loadedFillInMoments.length).fill(false));
+      setFeedbackMessages(Array(loadedFillInMoments.length).fill(''));
+      debounceTimers.current = Array(loadedFillInMoments.length).fill(null);
+    } else {
+      setUserInputs([]);
+      setLockedStates([]);
+      setFeedbackMessages([]);
+      debounceTimers.current = [];
     }
-  }, [gameData]) // Initialize inputs/results when gameData loads
 
-  const handleInputChange = (index: number, value: string) => {
-    const newInputs = [...userInputs]
-    newInputs[index] = value
-    setUserInputs(newInputs)
-  }
+    // Cleanup timers on unmount
+    return () => {
+        debounceTimers.current.forEach(timerId => {
+            if (timerId) clearTimeout(timerId as NodeJS.Timeout);
+        });
+    };
+  }, []); // Run only once on mount
 
-  const handleSubmit = () => {
-    if (!fillInMoments) return;
-
-    let currentScore = 0;
-    const currentResults = fillInMoments.map((moment, index) => {
-      const isCorrect = moment.answer.toLowerCase() === userInputs[index].trim().toLowerCase();
-      if (isCorrect) {
-        currentScore += Math.round(moment.importance * 10); // Score based on importance
+  // Check for game completion whenever lockedStates changes
+  useEffect(() => {
+    if (lockedStates.length > 0 && lockedStates.every(locked => locked)) {
+      setIsFinished(true);
+      if (user) {
+        // Score is already calculated incrementally
+        saveScore(score, lockedStates.length); // Pass final score and correct count
       }
-      return isCorrect;
+    }
+  }, [lockedStates, user, score]); // Added score dependency for saveScore
+
+  // Debounced check function
+  const debouncedCheck = useCallback((index: number, currentInputValue: string) => {
+    if (!fillInMoments[index] || lockedStates[index]) return; // Don't check if locked
+
+    const correctAnswer = fillInMoments[index].answer.trim().toLowerCase();
+    const trimmedInput = currentInputValue.trim().toLowerCase();
+
+    let feedback = '';
+    if (trimmedInput.length > 0 && correctAnswer.includes(trimmedInput) && trimmedInput !== correctAnswer) {
+      feedback = 'Keep going, or be more specific...';
+    }
+    setFeedbackMessages(prev => {
+      const newFeedback = [...prev];
+      newFeedback[index] = feedback;
+      return newFeedback;
+    });
+  }, [fillInMoments, lockedStates]);
+
+  // Handle Input Change with debouncing and locking
+  const handleInputChange = (index: number, value: string) => {
+    if (lockedStates[index] || isFinished) return; // Don't allow changes if locked or finished
+
+    // Update input state immediately
+    const newInputs = [...userInputs];
+    newInputs[index] = value;
+    setUserInputs(newInputs);
+
+    // Clear previous debounce timer for this input
+    if (debounceTimers.current[index]) {
+      clearTimeout(debounceTimers.current[index] as NodeJS.Timeout);
+      debounceTimers.current[index] = null;
+    }
+     // Clear feedback immediately on new input
+    setFeedbackMessages(prev => {
+        const newFeedback = [...prev];
+        newFeedback[index] = '';
+        return newFeedback;
     });
 
-    setResults(currentResults);
-    setScore(currentScore);
-    setIsFinished(true);
+    // Check for exact match
+    const correctAnswer = fillInMoments[index].answer.trim().toLowerCase();
+    const trimmedInput = value.trim().toLowerCase();
 
-    if (user) {
-      saveScore(currentScore, currentResults.filter(Boolean).length);
+    if (trimmedInput === correctAnswer) {
+      // Exact match: lock the state, update score, clear feedback
+      setLockedStates(prevLocked => {
+          const newLocked = [...prevLocked];
+          // Only update score if it wasn't already locked
+          if (!newLocked[index]) {
+              setScore(prevScore => prevScore + Math.round(fillInMoments[index].importance * 10))
+          }
+          newLocked[index] = true;
+          return newLocked;
+      });
+       setFeedbackMessages(prev => {
+           const newFeedback = [...prev];
+           newFeedback[index] = '';
+           return newFeedback;
+       });
+    } else {
+       // Not an exact match: set up debounce timer for partial check
+       debounceTimers.current[index] = setTimeout(() => {
+         debouncedCheck(index, value);
+       }, DEBOUNCE_DELAY);
     }
   };
 
@@ -92,7 +162,7 @@ export default function DailyChallengePage() {
         .insert({
           user_id: user.id,
           game_id: gameData.gameId,
-          mode: 'daily-fill-in', // New mode identifier
+          mode: 'daily-fill-in-reactive', // New mode identifier
           score: scoreWithBonus,
         })
       if (error) throw error
@@ -104,10 +174,15 @@ export default function DailyChallengePage() {
   }
 
   const restartGame = () => {
-    setUserInputs(Array(fillInMoments.length).fill(''))
-    setResults(Array(fillInMoments.length).fill(false))
-    setIsFinished(false)
-    setScore(0)
+    setUserInputs(Array(fillInMoments.length).fill(''));
+    setLockedStates(Array(fillInMoments.length).fill(false));
+    setFeedbackMessages(Array(fillInMoments.length).fill(''));
+    debounceTimers.current.forEach(timerId => {
+        if (timerId) clearTimeout(timerId as NodeJS.Timeout);
+    });
+    debounceTimers.current = Array(fillInMoments.length).fill(null);
+    setIsFinished(false);
+    setScore(0);
   }
 
   if (!gameData || !startMoment || !endMoment) {
@@ -119,7 +194,7 @@ export default function DailyChallengePage() {
     return (
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4 text-center">{gameData.title}</h1>
-        <p className="text-center text-gray-600 mb-6">Fill in the key moments between the start and end!</p>
+        <p className="text-center text-gray-600 mb-6">Fill in the key moments. Correct answers lock automatically!</p>
 
         <div className="bg-white p-6 md:p-8 rounded-lg shadow-md border border-gray-200 max-w-2xl mx-auto">
           {/* Start Moment Context */}
@@ -139,8 +214,17 @@ export default function DailyChallengePage() {
                   id={`moment-${index}`}
                   value={userInputs[index]}
                   onChange={(e) => handleInputChange(index, e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  disabled={lockedStates[index]} // Disable when locked
+                  className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none sm:text-sm 
+                    ${lockedStates[index]
+                      ? 'bg-green-50 border-green-300 text-gray-700 cursor-not-allowed' 
+                      : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                    }`}
                 />
+                {/* Feedback Message Area */}
+                {feedbackMessages[index] && (
+                  <p className="text-xs text-orange-600 mt-1">{feedbackMessages[index]}</p>
+                )}
               </div>
             ))}
           </div>
@@ -150,13 +234,6 @@ export default function DailyChallengePage() {
             <p className="text-lg text-gray-800 font-semibold">{endMoment.context}</p>
           </div>
 
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmit}
-            className="w-full px-6 py-3 rounded-md text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300"
-          >
-            Submit Guesses
-          </button>
         </div>
 
         {/* User login status indicator */}
@@ -175,7 +252,7 @@ export default function DailyChallengePage() {
 
   // --- Render Summary Screen --- //
   if (isFinished) {
-    const correctCount = results.filter(Boolean).length;
+    const correctCount = lockedStates.filter(Boolean).length; // All locked states are correct
     const scoreWithBonus = score + Math.round(correctCount * 5);
 
     return (
@@ -184,16 +261,16 @@ export default function DailyChallengePage() {
         <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200 max-w-xl mx-auto text-center">
           <h2 className="text-2xl font-semibold mb-4">Your Results for {gameData.title}</h2>
           <p className="text-4xl font-bold text-indigo-600 mb-4">{scoreWithBonus}</p>
-          <p className="text-lg text-gray-700 mb-6">You correctly filled in {correctCount} out of {fillInMoments.length} moments.</p>
+          <p className="text-lg text-gray-700 mb-6">You correctly identified all {fillInMoments.length} key moments!</p>
 
+          {/* Simplified summary - maybe just show score and prompts/answers again? */}
           <div className="mt-6 border-t pt-4 text-left space-y-3">
-             <h3 className="text-xl font-semibold mb-3 text-center">Your Answers:</h3>
+             <h3 className="text-xl font-semibold mb-3 text-center">Recap:</h3>
             {fillInMoments.map((moment, index) => (
-              <div key={moment.index} className={`p-3 rounded border ${results[index] ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <div key={moment.index} className="p-3 rounded border bg-green-50 border-green-200">
                 <p className="font-medium text-gray-800">{index + 1}. {moment.prompt}</p>
-                <p className={`text-sm ${results[index] ? 'text-green-700' : 'text-red-700'}`}>
-                  Your answer: <span className="italic">{userInputs[index] || '-'}</span>
-                  {!results[index] && <span className="font-semibold"> (Correct: {moment.answer})</span>}
+                <p className="text-sm text-green-700">
+                  Correct Answer: <span className="font-semibold">{moment.answer}</span>
                 </p>
               </div>
             ))}

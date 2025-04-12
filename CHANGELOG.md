@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file.
 - Implemented score saving to Supabase for logged-in users.
 
 ### Changed
-- Refactored Daily Challenge to a 'fill-in-the-blanks' format between start/end moments, using updated static data structure.
+- Refactored Daily Challenge to a reactive 'fill-in-the-blanks' format: answers lock automatically on exact match, partial matches get debounced feedback.
 - Removed login requirement for accessing the Daily Challenge (/daily).
 - Updated homepage CTA to always link to /daily.
 
