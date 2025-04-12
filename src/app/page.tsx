@@ -32,16 +32,16 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Placeholder: Team Rewind */}
-        <div className="bg-gray-200 p-6 rounded-lg shadow-sm border border-gray-300 flex flex-col items-center text-center opacity-60">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-700">Team Rewind</h2>
-          <p className="text-gray-500 mb-6">Pick a team, pick a game or season, and test your recall.</p>
-          <button
-            disabled
-            className="w-full px-6 py-3 rounded-md text-lg font-semibold text-white bg-gray-400 cursor-not-allowed"
+        {/* Updated: Team Rewind - Now Active */}
+        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 flex flex-col items-center text-center">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Team Rewind</h2>
+          <p className="text-gray-600 mb-6">Pick a team, pick a game or season, and test your recall.</p>
+          <Link
+            href="/rewind"
+            className="w-full px-6 py-3 rounded-md text-lg font-semibold text-white bg-teal-600 hover:bg-teal-700 transition duration-300 text-center"
           >
-            Coming Soon
-          </button>
+            Select Game
+          </Link>
         </div>
 
         {/* Placeholder: Shuffle Mode */}
