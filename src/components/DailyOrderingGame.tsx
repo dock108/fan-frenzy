@@ -9,7 +9,6 @@ import {
     DroppableProvided, 
     DraggableProvided, 
     DraggableStateSnapshot, 
-    DragStart 
 } from '@hello-pangea/dnd';
 import ResultsModal from './ResultsModal';
 import SocialShareButtons from './SocialShareButtons';
