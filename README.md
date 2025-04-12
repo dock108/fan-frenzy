@@ -48,6 +48,21 @@ The homepage (`/`) serves as the main entry point:
   - If the user is logged in, the CTA links directly to the `/daily` challenge page.
 - **Authentication Flow:** The Daily Challenge CTA always links to `/daily`. This page is accessible without login, but users need to log in to save scores.
 
+### Daily Challenge (/daily)
+
+- **Static Data:** The current version uses static data from `src/data/daily-challenge.json` to simulate the game.
+- **Gameplay:**
+  - Users are presented with a series of moments from a specific game/event.
+  - Each moment includes context, a multiple-choice question, and options.
+  - Users select an answer and click "Reveal".
+  - The correct answer, an explanation, and an AI-generated importance score are shown.
+  - Users progress through moments using the "Next Moment" button.
+- **Scoring:**
+  - Points are awarded based on the importance score of correctly answered moments.
+  - A small bonus is added for each correct answer.
+  - Logged-in users have their final score saved to the `scores` table in Supabase.
+- **Summary:** After the final moment, a summary screen displays the total score, number correct, and highlights any high-importance moments the user missed.
+
 ### Authentication
 
 This project uses Supabase Auth for email/password authentication.

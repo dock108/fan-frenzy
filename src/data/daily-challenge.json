@@ -1,0 +1,62 @@
+{
+  "gameId": "2004-alcs-g4",
+  "title": "2004 ALCS Game 4 – Red Sox vs Yankees",
+  "moments": [
+    {
+      "index": 0,
+      "context": "Bottom 9th, Yankees lead 4-3. Mariano Rivera enters. Red Sox are 3 outs from elimination.",
+      "question": "Who is the first batter Rivera faces?",
+      "options": [
+        "Johnny Damon",
+        "Mark Bellhorn",
+        "Kevin Millar",
+        "Orlando Cabrera"
+      ],
+      "answer": 2, // Kevin Millar drew a walk
+      "explanation": "Kevin Millar leads off the bottom of the 9th and draws a crucial walk against Mariano Rivera.",
+      "importance": 9.0
+    },
+    {
+      "index": 1,
+      "context": "Runner on 1st (Dave Roberts pinch-running), 0 outs. Bill Mueller batting.",
+      "question": "What does Dave Roberts famously do next?",
+      "options": [
+        "Gets picked off",
+        "Steals second base",
+        "Advances on a wild pitch",
+        "Gets thrown out stealing"
+      ],
+      "answer": 1, // The famous steal
+      "explanation": "Dave Roberts steals second base, putting the tying run in scoring position. 'The Steal' is one of baseball's most iconic moments.",
+      "importance": 9.8
+    },
+    {
+      "index": 2,
+      "context": "Runner on 2nd, 1 out. Bill Mueller singles up the middle.",
+      "question": "What is the result of the play?",
+      "options": [
+        "Dave Roberts scores, game tied 4-4",
+        "Dave Roberts is thrown out at the plate",
+        "Runner holds at third",
+        "Yankees turn a double play"
+      ],
+      "answer": 0, // Mueller ties the game
+      "explanation": "Bill Mueller singles, scoring Dave Roberts from second to tie the game 4-4, sending it to extra innings.",
+      "importance": 9.5
+    },
+    {
+      "index": 3,
+      "context": "Bottom 12th, tied 4-4. David Ortiz at bat, runner on second.",
+      "question": "What does David Ortiz do?",
+      "options": [
+        "Strikes out",
+        "Hits a walk-off home run",
+        "Grounds into a double play",
+        "Draws a walk"
+      ],
+      "answer": 1, // Big Papi walk-off
+      "explanation": "David Ortiz hits a dramatic walk-off two-run homer in the bottom of the 12th inning, winning the game 6-4 for the Red Sox and keeping their season alive.",
+      "importance": 9.9
+    }
+  ]
+} 
