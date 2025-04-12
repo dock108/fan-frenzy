@@ -255,7 +255,7 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
                                             <LockClosedIcon className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" aria-hidden="true" />
                                         )}
                                         <div className="flex-grow pr-2">
-                                            <p className={`text-sm ${textScoreClasses}`}>{moment.text}</p>
+                                            <p className={`text-xs ${textScoreClasses}`}>{moment.text}</p>
                                             {isFinal && !isLocked && finalItemScore < 4 && (
                                                 <p className="text-xs text-gray-500 mt-1">(Correct position: {moment.index})</p>
                                             )}
@@ -294,9 +294,9 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
                   >
                     Guess ({guessesRemaining} Remaining)
                   </button>
-                  {!hasDragged && !isGuessSubmitted && (
+                  {/* {!hasDragged && !isGuessSubmitted && (
                        <p className="text-xs text-gray-500 italic">(Drag an item to enable guessing)</p>
-                  )}
+                  )} */}
                   {isGuessSubmitted && (
                     <p className="text-sm text-gray-600">(Reorder items or wait for final guess)</p>
                   )}

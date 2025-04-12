@@ -163,6 +163,11 @@ function DailyChallengeContent() {
         )}
       </div>
 
+      {/* Instructional Text */}
+      <p className="text-center text-gray-600 text-sm mb-6">
+        Click, drag, and drop the moments below into the correct chronological order.
+      </p>
+
       {/* Grid for Game and Scoring Guide */}
       <div className="lg:grid lg:grid-cols-3 lg:gap-6">
         {/* Game Component Area */}
