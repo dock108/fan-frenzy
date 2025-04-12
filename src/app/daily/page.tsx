@@ -108,7 +108,7 @@ function DailyChallengeContent() {
       <div className="p-6 text-center text-blue-700 bg-blue-50 rounded-lg shadow-sm border border-blue-200 max-w-md mx-auto">
         <CheckCircleIcon className="h-10 w-10 mx-auto text-blue-500 mb-3" />
         <p className="font-semibold mb-1">Already Played Today!</p>
-        <p className="text-sm">You have completed today's challenge. Come back tomorrow for a new one!</p>
+        <p className="text-sm">You have completed today&apos;s challenge. Come back tomorrow for a new one!</p>
       </div>
     )
   }
