@@ -1,0 +1,9 @@
+# This file tells search engine crawlers which pages or files
+# the crawler can or can't request from your site.
+# Allow all crawlers full access to the site.
+
+User-agent: *
+Allow: /
+
+# Sitemap: [Optional - Add URL to your sitemap.xml if you have one]
+# e.g., Sitemap: https://www.yourdomain.com/sitemap.xml 

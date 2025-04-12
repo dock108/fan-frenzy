@@ -4,9 +4,9 @@ import { InformationCircleIcon, LockClosedIcon } from '@heroicons/react/24/outli
 const ScoringGuide: React.FC = () => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 h-full">
-      <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
+      <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center">
         <InformationCircleIcon className="h-5 w-5 mr-2 text-blue-500" /> Scoring Guide & Rules
-      </h3>
+      </h2>
       <div className="space-y-4 text-sm text-gray-600">
         <div className="space-y-2">
           <p className="font-medium text-gray-700">Gameplay:</p>

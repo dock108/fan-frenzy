@@ -72,14 +72,14 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-center py-8 bg-gray-50">
             <Image 
               src="/images/applogo.png" 
-              alt="FanFrenzy Logo" 
+              alt="FanFrenzy logo - daily sports memory challenge game" 
               width={220} 
               height={88} 
               priority
               className="w-[150px] md:w-[220px] h-auto mb-2"
             />
             <h1 className="text-xl md:text-2xl font-semibold text-center text-gray-800">
-              Daily Challenge
+              FanFrenzy: Daily Sports Memory Challenge
             </h1>
           </div>
 

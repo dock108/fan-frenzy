@@ -91,18 +91,33 @@ function DailyChallengeContent() {
 
   // Function to remove year in parentheses from title
   const formatTitle = (title: string): string => {
-    // Regex to match ' (YYYY)' at the end of the string
     return title.replace(/\s*\(\d{4}\)$/, '');
   };
 
+  // --- Updated Loading State with Skeletons --- 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-10 text-gray-600">
-        <ArrowPathIcon className="h-8 w-8 animate-spin mr-2" /> Loading Challenge...
-      </div>
-    )
-  }
+      <div className="max-w-4xl mx-auto p-4 animate-pulse">
+        {/* Skeleton for Game Details Card */}
+        <div className="bg-gray-200 rounded-lg shadow-md p-4 mb-6 text-center h-28">
+          <div className="h-6 bg-gray-300 rounded w-3/4 mx-auto mb-2"></div>
+          <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto mb-1.5"></div>
+          <div className="h-3 bg-gray-300 rounded w-1/3 mx-auto"></div>
+        </div>
 
+        {/* Skeleton for Grid */}
+        <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+          {/* Skeleton for Game Component Area */}
+          <div className="lg:col-span-2 bg-gray-200 rounded-lg shadow-md h-64"></div>
+          
+          {/* Skeleton for Scoring Guide Area */}
+          <div className="lg:col-span-1 mt-6 lg:mt-0 bg-gray-200 rounded-lg shadow-md h-64"></div>
+        </div>
+      </div>
+    );
+  }
+  
+  // --- Already Played State --- (remains the same)
   if (hasPlayedToday) {
     return (
       <div className="p-6 text-center text-blue-700 bg-blue-50 rounded-lg shadow-sm border border-blue-200 max-w-md mx-auto">
@@ -113,6 +128,7 @@ function DailyChallengeContent() {
     )
   }
 
+  // --- Error State --- (remains the same)
   if (error) {
     return (
       <div className="p-6 text-center text-red-600 bg-red-50 rounded-lg shadow-sm border border-red-200">
@@ -123,14 +139,15 @@ function DailyChallengeContent() {
     )
   }
 
+  // --- No Data State --- (remains the same)
   if (!challengeData) {
     return <div className="p-6 text-center text-gray-500">No challenge data found for the selected date.</div>
   }
 
-  // --- Corrected Return Structure --- 
+  // --- Render Actual Content --- (remains the same)
   return (
     <div className="max-w-4xl mx-auto p-4">
-      {/* Game Details Card - Updated */}
+       {/* Game Details Card - Updated */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-6 text-center">
         {/* Line 1: Title (Largest) - Year removed */}
         <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-1">{formatTitle(challengeData.title)}</h1>
