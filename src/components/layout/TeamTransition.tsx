@@ -22,7 +22,7 @@ const TeamTransition = ({
   teamColor = ''
 }: TeamTransitionProps) => {
   const [showTransition, setShowTransition] = useState(isActive);
-  const [color, setColor] = useState(teamColor || '#000000');
+  const [color, _setColor] = useState(teamColor || '#000000');
   
   // Effect to handle color changes when team changes
   useEffect(() => {

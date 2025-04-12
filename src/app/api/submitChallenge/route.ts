@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     let payload: SubmitChallengePayload;
     try {
       payload = await request.json();
-    } catch (parseError) {
+    } catch (_parseError) {
       return NextResponse.json({ message: 'Invalid request body' }, { status: 400 });
     }
 

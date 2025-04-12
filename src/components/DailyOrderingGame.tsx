@@ -66,7 +66,7 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
   };
 
   // Timer Start Logic
-  const onDragStart = (start: DragStart) => {
+  const onDragStart = (_start: DragStart) => {
     if (!startTime && !showFinalResults) {
       const now = Date.now();
       setStartTime(now);
@@ -93,7 +93,7 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
 
   useEffect(() => {
     return () => stopTimer();
-  }, []);
+  }, [stopTimer]);
 
   // Updated Drag End Logic
   const onDragEnd = (result: DropResult) => {
@@ -231,8 +231,8 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
                                   } else {
                                       stateClasses = 'bg-blue-50 border-blue-200 hover:bg-blue-100 cursor-grab'; 
                                   }
-                                  let textScoreClasses = isLocked ? 'text-green-800 font-medium' : 'text-gray-800';
-                                  let badgeClasses = isFinal ? 
+                                  const textScoreClasses = isLocked ? 'text-green-800 font-medium' : 'text-gray-800';
+                                  const badgeClasses = isFinal ? 
                                         (finalItemScore <= 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-300 text-green-800') : 
                                         'bg-gray-100 text-gray-800';
 

@@ -54,12 +54,14 @@ export async function POST(request: NextRequest) {
     // 4. Return Success
     return NextResponse.json({ message: 'Score saved successfully' }, { status: 200 })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API Save Score] General Error:', error)
     // Handle JSON parsing errors or other unexpected issues
     if (error instanceof SyntaxError) {
       return NextResponse.json({ message: 'Bad Request: Invalid JSON format.' }, { status: 400 })
     }
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
+    // Add type checking for Error instance
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    return NextResponse.json({ message }, { status: 500 })
   }
 } 

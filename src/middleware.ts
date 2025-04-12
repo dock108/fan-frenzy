@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(req: NextRequest) {
+export async function middleware(_req: NextRequest) {
   // Simply pass through all requests - no auth checking needed for Daily Challenge
   return NextResponse.next()
 }

@@ -42,7 +42,7 @@ const answerVariations: { [key: string]: string[] } = {
 
 export default function PlayPage() {
   const [gameData, setGameData] = useState<GameData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, _setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userInputs, setUserInputs] = useState<string[]>([]);
   const [lockedStates, setLockedStates] = useState<boolean[]>([]);
@@ -240,8 +240,8 @@ export default function PlayPage() {
 
   useEffect(() => {
     if (gameState === 'playing' && fillInMoments.length > 0 && lockedStates.every(Boolean)) {
-        const correctCount = lockedStates.filter(Boolean).length;
-        const totalQuestions = fillInMoments.length;
+        const _correctCount = lockedStates.filter(Boolean).length;
+        const _totalQuestions = fillInMoments.length;
         
         setGameState('summary');
     }

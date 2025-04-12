@@ -89,7 +89,7 @@ export default function useTeamTheme() {
     
     // Get the team colors (or default if not found)
     const teamColors = TEAM_THEMES[currentTeam] || TEAM_THEMES.default;
-    const isDark = theme === 'dark';
+    const _isDark = theme === 'dark';
     
     // Set CSS variables
     const root = document.documentElement;

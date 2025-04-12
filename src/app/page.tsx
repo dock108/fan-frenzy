@@ -86,7 +86,7 @@ export default function HomePage() {
           <div className="bg-amber-50 rounded-xl shadow-lg p-4 max-w-sm mx-auto mb-4">
             <CalendarDaysIcon className="h-8 w-8 mx-auto mb-2 text-yellow-500"/>
             <h2 className="text-xl font-bold mb-2 text-gray-800">
-              Today's Challenge
+              Today&apos;s Challenge
             </h2>
             <p className="text-md text-gray-600 mb-4 italic">
               {gameData.title}
