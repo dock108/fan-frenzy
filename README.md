@@ -16,6 +16,10 @@ This is a Next.js project bootstrapped with [`create-next-app`](https://github.c
 *   **Leaderboards:** Displays top scores for each game mode on the `/leaderboard` page.
 *   **Reusable Components:** Uses a modular `MomentCard` component to display moments consistently across game modes.
 *   **Challenge Feature:** Allows users to submit feedback on specific AI-generated moments to help improve the model.
+*   **Theme Support:** Features a light/dark mode toggle with support for team-based theming.
+*   **Consistent Layouts:** Uses a reusable AppShell component with responsive header and footer.
+*   **Team Theming:** Dynamic color scheme based on selected sports team.
+*   **Page Transitions:** Smooth animations between pages and states for a more immersive experience.
 
 ## Gameplay Modes
 
@@ -66,11 +70,25 @@ This is a Next.js project bootstrapped with [`create-next-app`](https://github.c
 *   Challenge data is stored in the `challenges` table in Supabase.
 *   Feedback does not affect the current game score.
 
-## Leaderboard (/leaderboard)
-*   Fetches top scores (currently top 20) for each game mode (Daily, Rewind, Shuffle) via the `/api/getLeaderboard` endpoint.
-*   Uses tabs to switch between modes.
-*   Displays rank, user (anonymized email or partial user ID), score, game/date context, and time of submission.
-*   Accessible to all users (public route).
+## Leaderboard (`/leaderboard`)
+
+*   **Layout:** Clean, responsive design using tabs for different game modes.
+*   **Display:** Uses a reusable `LeaderboardRow` component.
+    *   **Desktop:** Displays data in a table-like format with columns.
+    *   **Mobile:** Adapts to a card-based list view.
+*   **Highlights:** 
+    *   Top 3 ranks are indicated with 🥇🥈🥉 icons.
+    *   The current logged-in user's row is highlighted.
+*   **User Info:** Shows rank, user initials in an avatar, anonymized username, score, game/date, and submission time.
+
+### Mobile UX & Responsiveness
+
+*   **Strategy:** Mobile-first approach using Tailwind CSS utility classes.
+*   **Layout:** Uses `container mx-auto px-4` for consistent padding. Responsive grids (`grid-cols-*`, `md:grid-cols-*`) are used for layout shifts (e.g., Leaderboard).
+*   **Typography:** Relies on Tailwind's responsive font sizes. Text truncation is used where necessary.
+*   **Touch Targets:** Buttons and interactive elements generally adhere to minimum touch target sizes (e.g., >44px). CTAs in game modes are positioned at the bottom for easier thumb access.
+*   **Navigation:** Uses a responsive `AppShell` with a slide-in `MobileMenu` for small screens.
+*   **Performance:** Animations are kept brief (~300ms). Hover-only effects are minimal.
 
 ## Tech Stack
 
@@ -135,51 +153,36 @@ The homepage (`/`) serves as the main entry point:
   - If the user is logged in, the CTA links directly to the `/daily` challenge page.
 - **Authentication Flow:** The Daily Challenge CTA always links to `/daily`. This page is accessible without login, but users need to log in to save scores.
 
-### Daily Challenge (/daily)
+### Daily Challenge (`/daily`)
 
-- **Static Data:** The current version uses static data from `src/data/daily-challenge.json` to simulate the game.
-- **Data Fetching:** The `/daily` page fetches the challenge data from the `/api/getDailyChallenge` API route.
-- **Gameplay Format:** Reactive Fill-in-the-Blanks
-    - Users are shown the context of a starting moment and an ending moment from a specific game.
-    - Between these, a series of prompts are displayed, asking for key details (player name, play type, result, etc.) that occurred between the start and end points.
-    - Users type their answers into input fields for each prompt.
-    - **Reactive Feedback:** Input fields automatically lock with a green style upon an exact, case-insensitive match.
-    - If a user types a partial match (contains the answer but isn't exact) and pauses, a feedback message appears below the field prompting for more specificity.
-    - The game finishes automatically when all fields are locked.
-- **Grading & Summary:**
-  - User inputs are compared against the correct answers (case-insensitive).
-  - The summary screen shows which answers were correct/incorrect and displays the correct answer for any misses.
-- **Scoring:** Points are awarded incrementally as each field is correctly locked, based on the moment's importance score.
-- **Summary:** The summary screen displays the final score and a recap of the correct answers for each prompt.
+*   **Layout:** Multi-step immersive flow (Intro -> Playing -> Summary).
+*   **Gameplay:** Users fill in blank text inputs based on prompts related to a specific game narrative. 
+    *   **Immediate Feedback:** Inputs lock with a green style upon correct answer (case-insensitive, trims whitespace).
+    *   **Variations:** Accepts common synonyms for certain answers (e.g., "incompletion" for "incomplete pass", "homer" for "home run") via the `answerVariations` dictionary.
+    *   **Hints:** If the user types a partial match (e.g., correct last name but answer needs full name, or a significant substring) and pauses, a subtle hint appears below the input.
+    *   **Completion:** Game automatically moves to summary when all inputs are locked.
+    *   **Give Up:** A button allows users to skip to the summary screen early.
+*   **Intro:** Full-screen welcome with title, icon, description, and start CTA. Uses a subtle texture background.
+*   **Playing:** Immersive quiz screen with a blurred stadium/crowd background. Questions are presented in a single card with context. Progress bar and input focus use a consistent accent color (yellow/amber).
+*   **Summary:** Full-screen results page with a celebratory gradient background. Features a prominent score banner, detailed answer review (showing user input vs correct answer), and relevant CTAs (Leaderboard, Try Another Mode).
 
-### Team Rewind
+### Team Rewind (`/rewind`, `/rewind/play`)
 
-- **Selection (`/rewind`):** Allows users to select a team and year.
-    - Uses static lists for teams (e.g., `NE`, `PHI`) and years (e.g., `2023`, `2022`).
-    - Fetches a list of games for the selected team/year from `/api/getRewindGames`.
-    - Currently uses static game lists (e.g., `src/data/games/NE_2023.json`).
-    - Displays the list of available games.
-- **Gameplay (`/rewind/play?team=...&year=...&gameId=...`):**
-    - Navigated to when a user selects a game from the list.
-    - Fetches detailed game data (event summary, key moments) via `/api/fetchGame`.
-    - **Gameplay:** Presents a series of multiple-choice questions based on the fetched `key_moments`.
-      - Users select an answer, reveal the correct one + explanation, and see the importance score.
-      - Includes a "Skip" option with partial scoring.
-    - **Summary:** Shows final score, correct/skipped count, and missed high-importance moments.
-    - **Score Saving:** If logged in, the final score and game breakdown are saved via `/api/saveRewindScore` upon completion.
+*   **Layout:** Team selection grid followed by an immersive, team-themed game screen.
+*   **Selector:** Grid display of team logos. Selecting a team fetches available games for that team.
+*   **Transition:** Full-screen color overlay using team's primary color fades in/out when loading the game.
+*   **Playing Screen:** 
+    *   **Background:** Blurred team-specific imagery (placeholder currently) with a gradient overlay using `--team-primary` and `--team-secondary`. Team logo watermark in the corner.
+    *   **Theming:** UI elements like the progress bar, buttons, and potentially parts of the `MomentCard` use team colors set via CSS variables (`--team-primary`, `--team-secondary`, `--team-accent`) managed by the `useTeamTheme` hook.
+*   **Summary:** Results screen maintains the team's immersive background and uses team colors for highlighting score and CTAs.
 
-### Shuffle Mode (/shuffle)
+### Shuffle Mode (`/shuffle`)
 
-- **Data Fetching:** Fetches game data (currently hardcoded to Rutgers vs. Louisville 2006) via `/api/fetchGame`.
-- **Gameplay:**
-  - Extracts key moments (specifically the `context`) from the fetched data.
-  - Randomizes the order of these moments.
-  - Presents the moments in a list allowing drag-and-drop reordering (using `@hello-pangea/dnd`).
-- **Submission:**
-  - A "Submit Order" button becomes active after the user has reordered items.
-  - Clicking submit compares the user's order to the original chronological order (based on moment `index`).
-  - Displays the results locally (how many were placed correctly) and calculates a score.
-  - *Note: Score saving for Shuffle Mode is not yet implemented.*
+*   **Layout:** Immersive view with a subtle blurred background (timeline grid). Uses a sticky header for instructions.
+*   **Cards:** Draggable `MomentCard` components with sanitized context (scores, times removed). Visual feedback (shadow, outline) provided during drag.
+*   **Styling:** Uses a default accent color (purple) for the submit button and highlights, which can be overridden by team themes if applied.
+*   **Feedback:** After submission, cards change background and show a border/icon indicating correct (green check), close (yellow warning), or incorrect (red cross) placement. Importance score is also displayed.
+*   **Summary:** Results are shown in a themed box below the cards, including score and action buttons.
 
 ### API Routes
 
@@ -216,3 +219,247 @@ The homepage (`/`) serves as the main entry point:
   - Validates input and inserts the score and metadata into the `scores` table with `mode = 'shuffle'`.
 - **`/api/submitChallenge` (POST):**
   - Accepts `
+
+## Theme System
+
+FanFrenzy includes a comprehensive theme system that supports:
+
+* **Light/Dark Mode:** Toggle between light and dark themes using the icon in the header. The system defaults to your browser/OS preference.
+* **Team-Based Theming:** The app includes CSS variables for team colors that can be dynamically changed based on selected teams.
+
+### Design Tokens
+
+The app uses design tokens through CSS variables and Tailwind:
+
+```css
+/* Base UI tokens */
+--color-bg: #ffffff;      /* Light mode background */
+--color-fg: #171717;      /* Light mode text */
+--color-accent: #0ea5e9;  /* Accent color for actions */
+
+/* Dark mode overrides */
+.dark {
+  --color-bg: #0f0f0f;
+  --color-fg: #f9f9f9;
+  --color-accent: #22d3ee;
+}
+
+/* Team colors (NFL examples) */
+--team-primary: #002244;    /* Patriots blue */
+--team-secondary: #c60c30;  /* Patriots red */
+--team-accent: #b0b7bc;     /* Patriots silver */
+--team-overlay: rgba(0, 34, 68, 0.1);
+```
+
+### Using Team Colors in Components
+
+Access team colors in your components using Tailwind classes:
+
+```jsx
+<button className="bg-teamPrimary text-white hover:bg-teamSecondary">
+  Team-Colored Button
+</button>
+
+<div className="border border-teamPrimary bg-teamOverlay">
+  Content with team styling
+</div>
+```
+
+### Programmatically Change Team Theme
+
+Use the `useTeamTheme` hook to change team colors:
+
+```jsx
+import useTeamTheme from '@/hooks/useTeamTheme';
+
+function TeamSelector() {
+  const { setTeamTheme, resetTeamTheme, availableTeams } = useTeamTheme();
+  
+  return (
+    <div>
+      <button onClick={() => setTeamTheme('patriots')}>
+        Patriots Theme
+      </button>
+      <button onClick={() => setTeamTheme('bills')}>
+        Bills Theme
+      </button>
+      <button onClick={resetTeamTheme}>
+        Reset Theme
+      </button>
+    </div>
+  );
+}
+```
+
+### Available Teams
+
+The system includes themes for NFL teams including:
+- AFC East: Bills, Dolphins, Patriots, Jets
+- AFC North: Ravens, Bengals, Browns, Steelers
+- More teams can be added in `hooks/useTeamTheme.ts`
+
+## Layout System
+
+FanFrenzy includes a flexible layout system centered around the `AppShell` component that provides consistent structure across the application:
+
+### AppShell Component
+
+The `AppShell` component (`components/layout/AppShell.tsx`) serves as the main layout wrapper with:
+
+* **Responsive Header:** Brand/logo, navigation links, theme toggle, and user authentication controls
+* **Mobile Support:** Collapsible menu for small screens with fluid touch targets
+* **Optional Footer:** Copyright info and site links
+* **Props:**
+  ```typescript
+  {
+    children: React.ReactNode,
+    showHeader?: boolean, // defaults to true
+    showFooter?: boolean  // defaults to true
+  }
+  ```
+
+### DefaultLayout
+
+For most pages, use the `DefaultLayout` component which is a simple wrapper around `AppShell` with the same props:
+
+```jsx
+import DefaultLayout from '@/components/layout/DefaultLayout';
+
+export default function MyPage() {
+  return (
+    <DefaultLayout>
+      {/* Page content */}
+    </DefaultLayout>
+  );
+}
+```
+
+### Custom Layouts
+
+For specialized pages (like login screens or fullscreen games), you can:
+
+1. Use `AppShell` directly with custom options:
+   ```jsx
+   <AppShell showHeader={false}>
+     {/* Custom fullscreen content */}
+   </AppShell>
+   ```
+
+2. Or create custom layout components extending `AppShell` for specific sections of the site.
+
+### Mobile Navigation
+
+The mobile navigation is automatically handled through the `MobileMenu` component, which provides:
+- Touch-friendly slide-in drawer
+- Responsive design for small screens
+- Accessibility features (keyboard navigation, ARIA attributes)
+
+## Transition System
+
+FanFrenzy implements smooth transitions between pages and UI states using Framer Motion:
+
+### Page Transitions
+
+The `TransitionLayout` component wraps content with animated transitions for improved user experience:
+
+```jsx
+import TransitionLayout from '@/components/layout/TransitionLayout';
+
+export default function GamePage() {
+  return (
+    <TransitionLayout transitionMode="slide-up">
+      {/* Page content */}
+    </TransitionLayout>
+  );
+}
+```
+
+Available transition modes:
+- `default`: Fade in while sliding up slightly
+- `slide-up`: Slide up from the bottom
+- `slide-left`: Slide in from the right
+- `fade`: Simple fade in/out
+- `none`: No animation
+
+### Component-Level Transitions
+
+For transitions within a page or component (like changing steps in a flow):
+
+```jsx
+import { useState } from 'react';
+import PageTransition from '@/components/layout/PageTransition';
+
+function MultiStepFlow() {
+  const [step, setStep] = useState(1);
+  
+  return (
+    <div>
+      <PageTransition key={step} mode="fade">
+        {step === 1 && <StepOne />}
+        {step === 2 && <StepTwo />}
+      </PageTransition>
+      
+      <button onClick={() => setStep(prev => prev + 1)}>
+        Next Step
+      </button>
+    </div>
+  );
+}
+```
+
+### TeamTransition (Placeholder)
+
+A component prepared for future enhancements that will show immersive full-screen 
+color transitions when moving from team selection to team-specific game pages:
+
+```jsx
+import TeamTransition from '@/components/layout/TeamTransition';
+
+function TeamPage({ teamCode }) {
+  return (
+    <TeamTransition teamCode={teamCode} isActive={true}>
+      {/* Team-specific content */}
+    </TeamTransition>
+  );
+}
+```
+
+This feature is currently a placeholder scaffold that will be fully implemented
+in future updates.
+
+## Design System & Layout
+
+The application utilizes Tailwind CSS for styling and layout. Key design principles include:
+
+*   **Minimalism:** Clean interfaces, focus on content.
+*   **Team Theming:** Dynamic color palettes based on selected teams (future enhancement).
+*   **Immersive Layout:** Full-screen or near-full-screen layouts for game modes, using subtle backgrounds and smooth transitions.
+*   **Theme Awareness:** Support for both light and dark modes.
+
+### Homepage (`/`)
+
+*   **Layout:** Full-height hero section with scroll interaction to reveal game mode selection.
+*   **Components:** Gradient title, subtle background effects, large CTA, immersive game mode cards with hover effects.
+
+### Daily Challenge (`/daily`)
+
+*   **Layout:** Multi-step immersive flow (Intro -> Playing -> Summary).
+*   **Gameplay:** Users fill in blank text inputs based on prompts related to a specific game narrative. 
+    *   **Immediate Feedback:** Inputs lock with a green style upon correct answer (case-insensitive, trims whitespace).
+    *   **Variations:** Accepts common synonyms for certain answers (e.g., "incompletion" for "incomplete pass", "homer" for "home run") via the `answerVariations` dictionary.
+    *   **Hints:** If the user types a partial match (e.g., correct last name but answer needs full name, or a significant substring) and pauses, a subtle hint appears below the input.
+    *   **Completion:** Game automatically moves to summary when all inputs are locked.
+    *   **Give Up:** A button allows users to skip to the summary screen early.
+*   **Intro:** Full-screen welcome with title, icon, description, and start CTA. Uses a subtle texture background.
+*   **Playing:** Immersive quiz screen with a blurred stadium/crowd background. Questions are presented in a single card with context. Progress bar and input focus use a consistent accent color (yellow/amber).
+*   **Summary:** Full-screen results page with a celebratory gradient background. Features a prominent score banner, detailed answer review (showing user input vs correct answer), and relevant CTAs (Leaderboard, Try Another Mode).
+
+### Team Rewind (`/rewind`, `/rewind/play`)
+
+*   **Layout:** Team selection grid followed by an immersive, team-themed game screen.
+*   **Selector:** Grid display of team logos. Selecting a team fetches available games for that team.
+*   **Transition:** Full-screen color overlay using team's primary color fades in/out when loading the game.
+*   **Playing Screen:** 
+    *   **Background:** Blurred team-specific imagery (placeholder currently) with a gradient overlay using `--team-primary` and `--team-secondary`. Team logo watermark in the corner.
+    *   **Theming:** UI elements like the progress bar, buttons, and potentially parts of the `MomentCard` use team colors set via CSS variables (`--team-primary`, `--team-secondary`, `--team-accent`) managed by the `useTeamTheme` hook.
+*   **Summary:** Results screen maintains the team's immersive background and uses team colors for highlighting score and CTAs.

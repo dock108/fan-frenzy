@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
+import ThemeToggle from '@/components/ThemeToggle'
 
 export default function Header() {
   const { user, loading, signOut } = useAuth()
@@ -14,12 +15,12 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-gray-800 text-white p-4">
+    <header className="bg-gray-800 dark:bg-gray-900 text-white p-4">
       <nav className="container mx-auto flex justify-between items-center">
         <Link href="/" className="text-xl font-bold hover:text-gray-300">
           FanFrenzy
         </Link>
-        <div className="space-x-4">
+        <div className="flex items-center space-x-4">
           {loading ? (
             <span>Loading...</span>
           ) : user ? (
@@ -39,6 +40,7 @@ export default function Header() {
               <Link href="/leaderboard" className="hover:text-gray-300">
                 Leaderboard
               </Link>
+              <ThemeToggle />
               <button
                 onClick={handleSignOut}
                 className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
@@ -60,6 +62,7 @@ export default function Header() {
               <Link href="/leaderboard" className="hover:text-gray-300">
                 Leaderboard
               </Link>
+              <ThemeToggle />
               <Link href="/login" className="hover:text-gray-300">
                 Login / Sign Up
               </Link>

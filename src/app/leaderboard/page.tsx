@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import { Tab } from '@headlessui/react';
 import { LeaderboardEntry, LeaderboardResponse } from '@/pages/api/getLeaderboard'; // Import types
 import { formatDistanceToNow } from 'date-fns'; // For relative time
+import { useAuth } from '@/context/AuthContext'; // Import useAuth
+import { ArrowPathIcon, UserCircleIcon } from '@heroicons/react/24/solid'; // Import icons
+import TransitionLayout from '@/components/layout/TransitionLayout'; // Import TransitionLayout
+import LeaderboardRow from '@/components/LeaderboardRow';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -41,6 +45,7 @@ function displayGameContext(mode: string, gameId: string): string {
 }
 
 export default function LeaderboardPage() {
+  const { user, loading: authLoading } = useAuth(); // Get user and auth loading state
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +63,7 @@ export default function LeaderboardPage() {
         setLeaderboardData(data);
       } catch (err: any) {
         setError(err.message || 'An error occurred');
+        setLeaderboardData(null); // Clear data on error
       } finally {
         setIsLoading(false);
       }
@@ -65,90 +71,102 @@ export default function LeaderboardPage() {
     fetchLeaderboard();
   }, []);
 
-  const renderLeaderboardTable = (scores: LeaderboardEntry[]) => {
+  // Simple Loading Skeleton/Spinner
+  const LoadingState = () => (
+      <div className="flex justify-center items-center py-20">
+          <ArrowPathIcon className="h-8 w-8 text-gray-500 animate-spin mr-3" />
+          <span className="text-gray-500">Loading Leaderboard...</span>
+      </div>
+  );
+
+  // Improved Error Display
+  const ErrorState = ({ message }: { message: string }) => (
+       <div className="text-center py-10 px-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg shadow-sm">
+           <p className="text-red-600 dark:text-red-300">Error: {message}</p>
+       </div>
+  );
+
+  // Updated Table/List Renderer (will use LeaderboardRow)
+  const renderLeaderboardList = (scores: LeaderboardEntry[]) => {
     if (!scores || scores.length === 0) {
-      return <p className="text-center text-gray-500 py-6">No scores recorded for this mode yet.</p>;
+      return <p className="text-center text-gray-500 dark:text-gray-400 py-10">No scores recorded for this mode yet.</p>;
     }
 
     return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Game/Date</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {scores.map((entry) => (
-              <tr key={entry.id}>
-                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{entry.score_position}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700" title={entry.email || entry.user_id}>{displayUser(entry.email, entry.user_id)}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">{entry.score}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{displayGameContext(entry.mode, entry.game_id)}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500" title={new Date(entry.created_at).toLocaleString()}>
-                  {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}
-                </td>
-              </tr>
+        <div className="space-y-3 md:space-y-0"> {/* Remove spacing on desktop, rely on row borders */}
+            {/* Header Row (visible on md+) */}
+            <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
+                <div className="col-span-1">Rank</div>
+                <div className="col-span-5">User</div>
+                <div className="col-span-2 text-right">Score</div>
+                <div className="col-span-2">Game/Date</div>
+                <div className="col-span-2 text-right">Time</div>
+            </div>
+            {/* Map scores to LeaderboardRow */}
+            {scores.map((entry, index) => (
+                 <LeaderboardRow 
+                     key={entry.id}
+                     entry={entry}
+                     rank={entry.score_position} // Use score_position provided by API
+                     currentUserEmail={user?.email} // Pass current user's email
+                 />
             ))}
-          </tbody>
-        </table>
-      </div>
+        </div>
     );
   };
 
-  if (isLoading) {
-    return <div className="container mx-auto p-4 text-center">Loading Leaderboard...</div>;
-  }
-
-  if (error) {
-    return <div className="container mx-auto p-4 text-center text-red-600">Error: {error}</div>;
-  }
-
   return (
-    <div className="container mx-auto p-4 md:p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Leaderboards</h1>
+    <TransitionLayout transitionMode="fade">
+        <div className="container mx-auto p-4 md:p-6">
+          <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">Leaderboard</h1>
 
-      {leaderboardData ? (
-        <Tab.Group>
-          <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1 mb-6 max-w-md mx-auto">
-            {Object.keys(leaderboardData).map((mode) => (
-              <Tab
-                key={mode}
-                className={({ selected }) =>
-                  classNames(
-                    'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
-                    'ring-white/60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
-                    selected
-                      ? 'bg-white text-blue-700 shadow'
-                      : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
-                  )
-                }
-              >
-                {mode.charAt(0).toUpperCase() + mode.slice(1)} {/* Capitalize mode name */}
-              </Tab>
-            ))}
-          </Tab.List>
-          <Tab.Panels className="mt-2">
-            {Object.entries(leaderboardData).map(([_mode, scores], idx) => (
-              <Tab.Panel
-                key={idx}
-                className={classNames(
-                  'rounded-xl bg-white p-3 shadow',
-                  'ring-white/60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2'
-                )}
-              >
-                {renderLeaderboardTable(scores)}
-              </Tab.Panel>
-            ))}
-          </Tab.Panels>
-        </Tab.Group>
-      ) : (
-        <p className="text-center text-gray-500 py-6">Leaderboard data could not be loaded.</p>
-      )}
-    </div>
+          {/* Loading State */}
+          {isLoading && <LoadingState />} 
+
+          {/* Error State */}
+          {!isLoading && error && <ErrorState message={error} />} 
+
+          {/* Content State */}
+          {!isLoading && !error && leaderboardData && (
+            <Tab.Group>
+              {/* Styled Tabs */}
+              <Tab.List className="flex justify-center space-x-2 sm:space-x-4 rounded-xl mb-6">
+                {Object.keys(leaderboardData).map((mode) => (
+                  <Tab
+                    key={mode}
+                    className={({ selected }) =>
+                      classNames(
+                        'w-full max-w-[120px] sm:max-w-[150px] rounded-md px-3 py-2 text-sm font-medium leading-5 transition-colors duration-150',
+                        'focus:outline-none focus:ring-2 ring-offset-2 ring-offset-blue-400 dark:ring-offset-gray-900 ring-blue-500',
+                        selected
+                          ? 'bg-blue-600 text-white shadow'
+                          : 'text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                      )
+                    }
+                  >
+                    {mode.charAt(0).toUpperCase() + mode.slice(1)} 
+                  </Tab>
+                ))}
+              </Tab.List>
+              <Tab.Panels className="mt-2">
+                {Object.entries(leaderboardData).map(([_mode, scores], idx) => (
+                  <Tab.Panel
+                    key={idx}
+                    className={classNames(
+                      'rounded-xl focus:outline-none'
+                    )}
+                  >
+                    {renderLeaderboardList(scores)}
+                  </Tab.Panel>
+                ))}
+              </Tab.Panels>
+            </Tab.Group>
+          )}
+
+          {!isLoading && !error && !leaderboardData && (
+              <p className="text-center text-gray-500 py-10">Leaderboard data could not be loaded or is empty.</p>
+          )}
+        </div>
+    </TransitionLayout>
   );
 } 

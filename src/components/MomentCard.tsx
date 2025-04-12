@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react';
+import { CheckCircleIcon, InformationCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 interface MomentCardProps {
   context: string;
@@ -21,6 +22,8 @@ interface MomentCardProps {
   resultStatus?: 'correct' | 'close' | 'far_off';
   resultIsMostImportant?: boolean;
   resultCorrectPosition?: number;
+  // --- NEW: Prop for shuffle context --- //
+  isShuffleMode?: boolean;
 }
 
 const MomentCard: React.FC<MomentCardProps> = ({
@@ -40,7 +43,9 @@ const MomentCard: React.FC<MomentCardProps> = ({
   isDraggable = false,
   resultStatus,
   resultIsMostImportant,
-  resultCorrectPosition
+  resultCorrectPosition,
+  // --- NEW: Prop for shuffle context --- //
+  isShuffleMode = false
 }) => {
 
   const getOptionClasses = (index: number): string => {
@@ -60,16 +65,33 @@ const MomentCard: React.FC<MomentCardProps> = ({
     return 'bg-gray-100 border-gray-300 opacity-70'; // Other incorrect options
   };
 
-  // Determine border color for Shuffle results
-  const getShuffleResultBorder = (): string => {
-      if (!resultStatus) return 'border-gray-200';
+  // --- UPDATED: Shuffle Result Styling --- //
+  const getShuffleResultStyle = (): { borderClass: string; icon: React.ReactNode; bgColorClass: string } => {
+      if (!resultStatus) return { borderClass: 'border-gray-200 dark:border-gray-700', icon: null, bgColorClass: 'bg-white dark:bg-gray-800' };
       switch (resultStatus) {
-          case 'correct': return 'border-l-4 border-l-green-500';
-          case 'close': return 'border-l-4 border-l-yellow-500';
-          case 'far_off': return 'border-l-4 border-l-red-500';
-          default: return 'border-gray-200';
+          case 'correct': 
+              return { 
+                  borderClass: 'border-l-4 border-l-green-500', 
+                  icon: <CheckCircleIcon className="h-5 w-5 text-green-500" />, 
+                  bgColorClass: 'bg-green-50 dark:bg-green-900/30'
+              };
+          case 'close': 
+              return { 
+                  borderClass: 'border-l-4 border-l-yellow-500', 
+                  icon: <InformationCircleIcon className="h-5 w-5 text-yellow-500" />, 
+                  bgColorClass: 'bg-yellow-50 dark:bg-yellow-900/30'
+              };
+          case 'far_off': 
+              return { 
+                  borderClass: 'border-l-4 border-l-red-500', 
+                  icon: <XCircleIcon className="h-5 w-5 text-red-500" />,
+                  bgColorClass: 'bg-red-50 dark:bg-red-900/30' 
+              };
+          default: 
+              return { borderClass: 'border-gray-200 dark:border-gray-700', icon: null, bgColorClass: 'bg-white dark:bg-gray-800' };
       }
   };
+  const shuffleStyle = getShuffleResultStyle();
 
   // --- NEW: Helper to get Importance styling --- //
   const getImportanceStyle = (score: number | undefined): { badgeClass: string; textClass: string; label: string } => {
@@ -84,70 +106,83 @@ const MomentCard: React.FC<MomentCardProps> = ({
   const importanceStyle = getImportanceStyle(importance);
   const importanceTooltip = "Calculated based on swing in win probability, game context, and momentum.";
 
-  const cardBaseClasses = "p-4 rounded border bg-white transition-shadow";
-  const draggableClasses = isDraggable ? "shadow border-gray-200" : "shadow-md border border-gray-200";
-  const shuffleResultClasses = resultStatus ? getShuffleResultBorder() : '';
+  // Base card classes
+  const cardBaseClasses = "p-4 rounded-lg border transition-shadow duration-150 ease-in-out";
+  // Conditional classes based on state
+  const stateClasses = isDraggable && !resultStatus
+      ? 'shadow hover:shadow-md dark:border-gray-700 bg-white dark:bg-gray-800' // Draggable state
+      : resultStatus 
+          ? `${shuffleStyle.borderClass} ${shuffleStyle.bgColorClass}` // Result state
+          : 'shadow-md border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'; // Default MC state
+  const opacityClass = disabled && !isRevealed ? 'opacity-70' : '';
 
   return (
-    <div className={`${cardBaseClasses} ${isDraggable ? shuffleResultClasses : draggableClasses} ${disabled && !isRevealed ? 'opacity-70' : ''}`}>
-        {displayIndex && totalMoments && (
+     <div className={`${cardBaseClasses} ${stateClasses} ${opacityClass}`}>
+        {/* Optional: Display Index for non-shuffle modes */}
+        {!isShuffleMode && displayIndex && totalMoments && (
             <p className="text-sm text-center text-gray-500 mb-3 font-medium">Moment {displayIndex} of {totalMoments}</p>
         )}
 
-      {/* --- Context --- */}
-      <p className="text-gray-700 mb-4 italic">
-          {context} {resultIsMostImportant && <span title="Most Important Moment">⭐</span>}
-      </p>
+        {/* --- Context --- */}
+        {/* Make context slightly smaller for shuffle mode */}
+        <p className={`text-gray-700 dark:text-gray-300 mb-4 italic ${isShuffleMode ? 'text-sm' : ''}`}>
+            {context}
+            {/* Show most important star only in results */}
+            {resultStatus && resultIsMostImportant && <span title="Most Important Moment" className="ml-1">⭐</span>}
+        </p>
 
-      {/* --- Multiple Choice Section --- */}
-      {question && options && onSelect && (
-        <>
-          <h2 className={`text-xl font-semibold mb-4 ${disabled ? 'text-gray-600' : 'text-gray-900'}`}>{question}</h2>
-          <div className="space-y-3 mb-6">
-            {options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => onSelect(index)}
-                disabled={disabled || isRevealed} // Disable if game disabled or answer revealed
-                className={`block w-full text-left p-3 rounded border transition duration-150 ${getOptionClasses(index)} disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent`}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
+        {/* --- Multiple Choice Section (Hidden in Shuffle Mode) --- */}
+        {!isShuffleMode && question && options && onSelect && (
+            <>
+              <h2 className={`text-xl font-semibold mb-4 ${disabled ? 'text-gray-600' : 'text-gray-900'}`}>{question}</h2>
+              <div className="space-y-3 mb-6">
+                {options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => onSelect(index)}
+                    disabled={disabled || isRevealed} // Disable if game disabled or answer revealed
+                    className={`block w-full text-left p-3 rounded border transition duration-150 ${getOptionClasses(index)} disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </>
+        )}
 
-      {/* --- Footer: Importance & Challenge Button --- */}
-      <div className="flex justify-between items-center mt-4 pt-2 border-t border-gray-200 min-h-[30px]">
-        <div title={importanceTooltip}>
-            {isRevealed && typeof importance === 'number' && (
-                <span className={`text-xs font-medium px-2 py-0.5 rounded ${importanceStyle.badgeClass} ${importanceStyle.textClass}`}>
-                    AI Importance: {importance.toFixed(1)}/10 ({importanceStyle.label})
-                </span>
-            )}
+        {/* --- Footer: Importance, Challenge, Shuffle Result --- */}
+        <div className="flex justify-between items-center mt-4 pt-2 border-t border-gray-200 dark:border-gray-600 min-h-[30px]">
+            {/* Importance Score (Show only on reveal if not shuffle) */}
+            <div title={importanceTooltip}>
+                {(isRevealed || resultStatus) && typeof importance === 'number' && (
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded ${importanceStyle.badgeClass} ${importanceStyle.textClass}`}>
+                        AI Importance: {importance.toFixed(1)} ({importanceStyle.label})
+                    </span>
+                )}
+            </div>
+            <div className="flex items-center space-x-2">
+                {/* Shuffle Result Details */}
+                {resultStatus && (
+                    <div className="flex items-center space-x-1">
+                        {shuffleStyle.icon}
+                        {resultStatus !== 'correct' && typeof resultCorrectPosition === 'number' && (
+                             <p className="text-xs text-gray-600 dark:text-gray-400">(Correct: #{resultCorrectPosition})</p>
+                        )}
+                    </div>
+                )}
+                 {/* Challenge Button */}
+                 {onChallengeClick && (
+                     <button
+                         onClick={onChallengeClick}
+                         className="text-xs text-red-500 hover:text-red-700 border border-red-300 dark:border-red-600 dark:hover:border-red-500 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                         disabled={challengeDisabled}
+                         title={challengeDisabled ? "Log in to challenge moments" : "Challenge this moment"}
+                     >
+                         Challenge
+                     </button>
+                 )}
+            </div>
         </div>
-        <div className="flex items-center space-x-2">
-            {resultStatus && resultStatus !== 'correct' && typeof resultCorrectPosition === 'number' && (
-                <p className="text-xs text-gray-600">Correct: #{resultCorrectPosition}</p>
-            )}
-            {resultStatus && (
-                 <span className="text-lg">
-                     {resultStatus === 'correct' ? '✅' : resultStatus === 'close' ? '⚠️' : '❌'}
-                 </span>
-            )}
-            {onChallengeClick && (
-                <button
-                    onClick={onChallengeClick}
-                    className="text-xs text-red-500 hover:text-red-700 border border-red-300 px-2 py-1 rounded hover:bg-red-50 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={challengeDisabled}
-                    title={challengeDisabled ? "Log in to challenge moments" : "Challenge this moment"}
-                >
-                    Challenge
-                </button>
-            )}
-        </div>
-      </div>
     </div>
   );
 };

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { Toaster } from "react-hot-toast";
-import Header from "@/components/Header";
 import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -18,14 +18,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} bg-gray-50`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className}`}>
         <AuthProvider>
-          <Toaster position="top-center" reverseOrder={false} />
-          <Header />
-          <main className="container mx-auto px-4 py-8 min-h-[calc(100vh-128px)]">
+          <ThemeProvider>
+            <Toaster position="top-center" reverseOrder={false} />
             {children}
-          </main>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

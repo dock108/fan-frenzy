@@ -1,26 +1,86 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base UI tokens */
+  --color-bg: #ffffff;
+  --color-fg: #171717;
+  --color-accent: #0ea5e9; /* sky-500 */
+  
+  /* Default team colors */
+  --team-primary: #3b82f6;   /* blue-500 */
+  --team-secondary: #1d4ed8; /* blue-700 */
+  --team-accent: #f97316;    /* orange-500 */
+  --team-overlay: rgba(59, 130, 246, 0.1); /* blue-500 with opacity */
+  
+  /* Spacing and size variables */
+  --header-height: 4rem;
+  --sidebar-width: 16rem;
+  --content-width: 64rem;
+  
+  /* Animation durations */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  
+  /* z-index layers */
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-drawer: 30;
+  --z-modal: 40;
+  --z-toast: 50;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-fg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --color-bg: #0f0f0f;
+  --color-fg: #f9f9f9;
+  --color-accent: #22d3ee; /* cyan-400 */
+  
+  /* Darker team colors for dark mode */
+  --team-primary: #2563eb;   /* blue-600 */
+  --team-secondary: #1e40af; /* blue-800 */
+  --team-accent: #ea580c;    /* orange-600 */
+  --team-overlay: rgba(37, 99, 235, 0.2); /* blue-600 with opacity */
+}
+
+/* NFL Team Classes - These will be applied dynamically */
+.team-jets {
+  --team-primary: #125740;
+  --team-secondary: #000000;
+  --team-accent: #ffffff;
+  --team-overlay: rgba(18, 87, 64, 0.1);
+}
+
+.team-patriots {
+  --team-primary: #002244;
+  --team-secondary: #c60c30;
+  --team-accent: #b0b7bc;
+  --team-overlay: rgba(0, 34, 68, 0.1);
+}
+
+.team-bills {
+  --team-primary: #00338d;
+  --team-secondary: #c60c30;
+  --team-accent: #ffffff;
+  --team-overlay: rgba(0, 51, 141, 0.1);
+}
+
+.team-dolphins {
+  --team-primary: #008e97;
+  --team-secondary: #fc4c02;
+  --team-accent: #005778;
+  --team-overlay: rgba(0, 142, 151, 0.1);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-bg);
+  color: var(--color-fg);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color var(--duration-normal), color var(--duration-normal);
 }

@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Initial project setup with Next.js, TypeScript, Tailwind CSS.
+- Basic layout components (Navbar, Footer).
+- Authentication context (`AuthContext`) using dummy data.
+- Placeholder pages for game modes (Daily, Rewind, Shuffle).
+- Demo pages for Theme and Transitions.
+- Initial Daily Challenge API endpoint (`/api/getDailyChallenge`).
+- Score saving API endpoint (`/api/saveScore`).
+- Basic leaderboard page and API (`/leaderboard`, `/api/getLeaderboard`).
+- Implemented page transitions using `framer-motion`.
+- Added `react-hot-toast` for notifications.
+- Added Heroicons library.
+- Added answer variation dictionary and logic to Daily Challenge.
+- Added hint system (Close, Need full name) to Daily Challenge inputs.
+- Added "Give Up" button to Daily Challenge.
 - Initialized project with Next.js (TypeScript, Tailwind, App Router) and Supabase setup.
 - Added email/password authentication using Supabase Auth (login, signup, logout).
 - Implemented protected routes (/dashboard) using middleware.
@@ -37,7 +51,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `challenges` table schema (`sql/create_challenges_table.sql`).
 - Created API route `/api/submitChallenge` to save moment feedback.
 - Added reusable `ChallengeModal` component (`src/components/ChallengeModal.tsx`) using Headless UI.
-- Integrated challenge feature into Daily Challenge UI (`/daily`).
 - Created reusable `MomentCard` component (`src/components/MomentCard.tsx`).
 - Integrated `MomentCard` into Daily Challenge, Team Rewind, and Shuffle Mode pages.
 - Added AI Importance Score visualization (badge, color-coding, tooltip) to `MomentCard`.
@@ -45,9 +58,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created API route `/api/getLeaderboard` to fetch ranked scores.
 - Created Leaderboard page (`/leaderboard`) with tabs for different modes.
 - Added Leaderboard link to header.
+- Added global light/dark theme support using next-themes and Tailwind CSS.
+- Created ThemeProvider context to manage theme state.
+- Added ThemeToggle component to toggle between light and dark modes.
+- Updated global CSS variables to support team theming via CSS variables (--team-primary, --team-accent, --team-overlay).
+- Added color scheme aware styling to all main game cards and components.
+- Updated tailwind.config.mjs to support dark mode and team color variables.
+- Created AppShell layout component with responsive header and footer.
+- Added MobileMenu component for navigation on small screens.
+- Created DefaultLayout wrapper for consistent page structure.
+- Implemented the layout system in the Daily Challenge page.
+- Added support for toggling header and footer visibility.
+- Updated README with layout system documentation.
+- Added Tailwind design tokens and CSS variable-based team color support.
+- Created useTeamTheme hook for dynamic team color management.
+- Expanded team color system with support for NFL teams.
+- Added TeamThemeDemo component for testing team themes.
+- Created team-theme-demo page for showcasing theme capabilities.
+- Updated UI components to use new design tokens and team colors.
+- Added Framer Motion for page and component transitions.
+- Created PageTransition component for animated transitions between UI states.
+- Implemented TransitionLayout for page level transitions.
+- Added TeamTransition component (placeholder) for future team entry transitions.
+- Created transition-demo page with interactive demonstrations.
+- Updated Daily Challenge page with smooth transitions.
+- Added links to transition demo from homepage and team theme page.
+- Updated README with transition system documentation.
 
 ### Changed
-- Refactored `/api/fetchGame` to potentially use OpenAI for moment generation and ensure multiple-choice format (Step 11).
+- Refactored homepage (/) to use new immersive dashboard design.
+- Redesigned Daily Challenge (/daily) using immersive layout and mode-specific styling.
+- Implemented immersive Team Rewind experience with team-specific visuals.
+- Refined Shuffle Mode with immersive background, styled moment cards, and clean scoring interface.
 - Updated Daily Challenge page to use reactive format based on API response (Step 8) -> Refactored again to use MomentCard (Step 17).
 - Updated Team Rewind gameplay page (`/rewind/play`) to use MomentCard (Step 17).
 - Updated Shuffle Mode page (`/shuffle`) to use MomentCard (Step 17).
@@ -56,21 +98,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Shuffle Mode UI to display game info (Step 13+).
 - Standardized `scores` table to use a `metadata` JSONB column instead of individual columns (`total_moments`, etc.) (Step 19 Fix).
 - Updated `saveRewindScore` API to use the new `metadata` column (Step 19 Fix).
+- Enhanced UI with theme-aware styling for better light/dark mode support.
+- Updated the Header component to include a theme toggle button.
+- Restructured app layout to use the AppShell component instead of directly inserting Header and content.
+- Updated Daily Challenge page with dark mode compatible styling and AppShell layout.
+- Reworked layout system to include transition capabilities.
+- Enhanced homepage with more prominent links to demo pages.
+- Redesigned Leaderboard with rank indicators, mobile responsiveness, and clean styling.
+- Completed mobile responsiveness and touch UX polish across all game modes.
+- Restored immediate interactive feedback (locking inputs) to Daily Challenge.
 
 ### Fixed
-- Resolved build errors related to `@next/font` usage.
-- Fixed middleware issue with environment variable loading.
-- Corrected invalid regex errors in Shuffle Mode context sanitization (Step 13+).
-- Fixed build errors related to React rendering / syntax errors (Multiple Steps).
-- Fixed SQL syntax errors in `create_challenges_table.sql` (Step 16+).
-- Fixed dependency issue (`@headlessui/react`, `date-fns` not installed) (Step 17+, Step 19+).
-- Fixed component structure/syntax error in `rewind/play/page.tsx` (Step 17+).
-- Fixed Supabase RPC call error in `getLeaderboard` API by creating a proper SQL function (`get_leaderboard`) (Step 19+).
-- Fixed `get_leaderboard` function error due to missing `metadata` column by altering `scores` table schema (Step 19+).
-- Fixed `get_leaderboard` function error `WITHIN GROUP is required` by changing `rank` alias to `position` (Step 19+).
-- Fixed `get_leaderboard` function syntax error by changing alias `position` to `score_position` (Step 19+).
-
-### Removed
-- Mock game data fetching logic replaced by API calls.
-- Hardcoded moment rendering logic in `/daily`, `/rewind/play`, `/shuffle` replaced by `MomentCard`.
-- Removed individual `total_moments`, `correct_moments`, `skipped_moments` columns from `scores` table (Step 19 Fix).
+- Resolved minor styling issues in Navbar.
+- Corrected transition timings.
+- Resolved Module Not Found error for `@heroicons/react`.
+- Corrected invalid `transitionMode` prop in Daily Challenge.
+- Removed unnecessary scroll behavior on homepage.
+- Resolved build errors related to `@next/font`
