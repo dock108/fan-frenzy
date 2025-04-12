@@ -24,7 +24,7 @@ function displayUser(email: string | null, userId: string): string {
 }
 
 // Helper to display game context based on mode
-function displayGameContext(mode: string, gameId: string, metadata: any): string {
+function displayGameContext(mode: string, gameId: string): string {
     switch (mode) {
         case 'daily':
             // Assuming daily uses date as gameId YYYY-MM-DD
@@ -88,7 +88,7 @@ export default function LeaderboardPage() {
                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{entry.score_position}</td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700" title={entry.email || entry.user_id}>{displayUser(entry.email, entry.user_id)}</td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">{entry.score}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{displayGameContext(entry.mode, entry.game_id, entry.metadata)}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{displayGameContext(entry.mode, entry.game_id)}</td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500" title={new Date(entry.created_at).toLocaleString()}>
                   {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}
                 </td>
@@ -133,7 +133,7 @@ export default function LeaderboardPage() {
             ))}
           </Tab.List>
           <Tab.Panels className="mt-2">
-            {Object.entries(leaderboardData).map(([mode, scores], idx) => (
+            {Object.entries(leaderboardData).map(([_mode, scores], idx) => (
               <Tab.Panel
                 key={idx}
                 className={classNames(

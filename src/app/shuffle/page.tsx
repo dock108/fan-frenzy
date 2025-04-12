@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import MomentCard from '@/components/MomentCard'
 import ChallengeModal from '@/components/ChallengeModal'
@@ -20,9 +19,15 @@ interface MultipleChoiceMoment extends MomentBase { // Reusing MC type for shuff
     importance?: number;
 }
 type Moment = MultipleChoiceMoment; // For shuffle, we primarily care about context/index
+interface EventData { // Define a basic type for event_data if needed
+    shortName?: string;
+    date?: string;
+    // Add other relevant fields if available/used
+}
 interface GameData {
-    event_data: any;
-    key_moments: Moment[];
+    event_data: EventData | null; // Use defined type
+    key_moments: MultipleChoiceMoment[];
+    game_id?: string; // Ensure game_id is part of fetched data if needed elsewhere
 }
 
 // --- NEW: Result Status Type --- //
@@ -125,13 +130,15 @@ export default function ShuffleModePage() {
                 }
 
                 // Expecting MC moments based on API V11 refactor
-                 if (!data || !Array.isArray(data.key_moments) || data.key_moments.length === 0) {
+                 if (!data || !data.key_moments || !Array.isArray(data.key_moments) || data.key_moments.length === 0) {
                     throw new Error('No valid moments found for shuffle mode.');
                  }
                  // Ensure moments have context and index
                  const validMoments = data.key_moments
-                     .filter((m: any) => m.type === 'mc' && typeof m.context === 'string' && typeof m.index === 'number')
-                     .map((m: any) => ({ ...m, type: 'shuffle-item', importance: m.importance ?? 0 })) as MultipleChoiceMoment[]; // Default importance to 0 if missing
+                     .filter((m): m is MultipleChoiceMoment => // Type guard filter
+                         m.type === 'mc' && typeof m.context === 'string' && typeof m.index === 'number'
+                     )
+                     .map((m) => ({ ...m, type: 'shuffle-item', importance: m.importance ?? 0 }));
 
                 if (validMoments.length < 2) { // Need at least 2 moments to shuffle
                      throw new Error('Not enough moments with context found for shuffle mode.');
@@ -154,9 +161,10 @@ export default function ShuffleModePage() {
                      setGameInfo("Game details unavailable"); // Fallback
                 }
 
-            } catch (err: any) {
+            } catch (err: unknown) { // Use unknown
+                const message = err instanceof Error ? err.message : 'An unknown error occurred';
                 console.error("Failed to fetch/process game data for shuffle:", err);
-                setError(err.message || 'An unknown error occurred.');
+                setError(message);
             } finally {
                 setIsLoading(false);
             }
@@ -223,9 +231,10 @@ export default function ShuffleModePage() {
             setSaveSuccess(true);
             console.log("Shuffle score saved successfully.");
 
-        } catch (err: any) {
+        } catch (err: unknown) { // Use unknown
+            const message = err instanceof Error ? err.message : 'Could not save score';
             console.error("Error saving shuffle score:", err);
-            setSaveError(err.message || 'Could not save score.');
+            setSaveError(message);
             setSaveSuccess(false);
             // Optional: Allow retry? For now, we just show error.
         } finally {
@@ -323,16 +332,6 @@ export default function ShuffleModePage() {
             </div>
         );
     }
-
-    // --- UPDATED: Render Logic with Enhanced Feedback --- //
-    const getBorderColor = (status: ResultStatus): string => {
-        switch (status) {
-            case 'correct': return 'border-l-green-500';
-            case 'close': return 'border-l-yellow-500';
-            case 'far_off': return 'border-l-red-500';
-            default: return 'border-gray-200';
-        }
-    };
 
     return (
         <div className="container mx-auto p-4">

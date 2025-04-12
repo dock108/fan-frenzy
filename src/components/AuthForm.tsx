@@ -10,30 +10,30 @@ export default function AuthForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setError(null)
     setLoading(true)
-    try {
-      let error
-      if (isSignUp) {
-        const { error: signUpError } = await supabase.auth.signUp({ email, password })
-        error = signUpError
-        if (!error) toast.success('Signed up! Check your email if confirmation is required.')
-      } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
-        error = signInError
-        if (!error) toast.success('Signed in!')
-      }
 
-      if (error) throw error
+    const { email, password } = { email, password }
+    const authMethod = isSignUp ? supabase.auth.signUp : supabase.auth.signInWithPassword
+
+    try {
+      const { error: authError } = await authMethod({ email, password })
+      if (authError) {
+        throw authError
+      }
       // Redirect to dashboard after successful sign in/up
       router.push('/dashboard')
       // Refresh might be needed if middleware doesn't pick up immediately
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || `Failed to ${isSignUp ? 'sign up' : 'sign in'}`)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Authentication failed'
+      console.error('Auth Error:', err)
+      setError(message)
     } finally {
       setLoading(false)
     }

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo, PropsWithChildren } from 'react'
 import { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/utils/supabase' // Assuming supabase client is exported from here
 import toast from 'react-hot-toast'
@@ -9,15 +9,19 @@ interface AuthContextType {
   session: Session | null
   user: User | null
   loading: boolean
+  signIn: (credentials: Credentials) => Promise<AuthResponse>
+  signUp: (credentials: Credentials) => Promise<AuthResponse>
   signOut: () => Promise<void>
+  error: string | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -49,28 +53,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [])
 
-  const signOut = async () => {
-    setLoading(true)
-    try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-      setSession(null)
-      setUser(null)
-      toast.success('Signed out successfully!')
-    } catch (error: any) {
-      console.error("Error signing out:", error.message)
-      toast.error(`Sign out failed: ${error.message}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const value = {
-    session,
+  const value = useMemo(() => ({
     user,
+    session,
     loading,
-    signOut,
-  }
+    error,
+    signIn: async (credentials: Credentials) => {
+      setError(null)
+      try {
+        const response = await supabase.auth.signInWithPassword(credentials)
+        if (response.error) throw response.error
+        return response
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Sign in failed'
+        setError(message)
+        throw err
+      }
+    },
+    signUp: async (credentials: Credentials) => {
+      setError(null)
+      try {
+        const response = await supabase.auth.signUp(credentials)
+        if (response.error) throw response.error
+        return response
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Sign up failed'
+        setError(message)
+        throw err
+      }
+    },
+    signOut: async () => {
+      setError(null)
+      try {
+        await supabase.auth.signOut()
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Sign out failed'
+        setError(message)
+        console.error('Sign out error:', err)
+      }
+    },
+  }), [user, session, loading, error])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

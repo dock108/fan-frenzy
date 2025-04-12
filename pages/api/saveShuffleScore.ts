@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     let payload: SaveShuffleScorePayload;
     try {
       payload = await request.json();
-    } catch (e) {
+    } catch (parseError) {
       return NextResponse.json({ message: 'Invalid request body' }, { status: 400 });
     }
 
@@ -61,21 +61,22 @@ export async function POST(request: Request) {
     };
 
     // 4. Insert into Supabase
-    const { error: insertError } = await supabase
+    const { error } = await supabase
       .from('scores')
       .insert([scoreData]);
 
-    if (insertError) {
-      console.error('Supabase Insert Error:', insertError.message);
+    if (error) {
+      console.error('Supabase Insert Error:', error.message);
       // Consider more specific error handling (e.g., duplicate violation?)
-      return NextResponse.json({ message: `Failed to save score: ${insertError.message}` }, { status: 500 });
+      return NextResponse.json({ message: `Failed to save score: ${error.message}` }, { status: 500 });
     }
 
     // 5. Return Success
     return NextResponse.json({ message: 'Shuffle score saved successfully' }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('API Route Error:', error);
-    return NextResponse.json({ message: `An unexpected error occurred: ${error.message}` }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'An unknown error occurred';
+    return NextResponse.json({ message: `An unexpected error occurred: ${message}` }, { status: 500 });
   }
 } 

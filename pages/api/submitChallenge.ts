@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     let payload: SubmitChallengePayload;
     try {
       payload = await request.json();
-    } catch (e) {
+    } catch (parseError) {
       return NextResponse.json({ message: 'Invalid request body' }, { status: 400 });
     }
 
@@ -60,20 +60,21 @@ export async function POST(request: Request) {
     };
 
     // 4. Insert into Supabase
-    const { error: insertError } = await supabase
+    const { error } = await supabase
       .from('challenges')
       .insert([challengeData]);
 
-    if (insertError) {
-      console.error('Supabase Insert Error (challenges):', insertError.message);
-      return NextResponse.json({ message: `Failed to submit challenge: ${insertError.message}` }, { status: 500 });
+    if (error) {
+      console.error('Supabase Insert Error (challenges):', error.message);
+      return NextResponse.json({ message: `Failed to submit challenge: ${error.message}` }, { status: 500 });
     }
 
     // 5. Return Success
     return NextResponse.json({ message: 'Challenge submitted successfully' }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('API Route Error (submitChallenge):', error);
-    return NextResponse.json({ message: `An unexpected error occurred: ${error.message}` }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'An unknown error occurred';
+    return NextResponse.json({ message: `An unexpected error occurred: ${message}` }, { status: 500 });
   }
 } 

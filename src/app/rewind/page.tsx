@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { useAuth } from '@/context/AuthContext' // To potentially check login status
+import { useRouter } from 'next/navigation'
 
 // Define the expected structure of the game list data
 interface GameInfo {
@@ -18,7 +18,7 @@ const TEAMS = ['NE', 'PHI', 'NYJ', 'MIA', 'DAL']; // Add more as needed
 const YEARS = [2023, 2022, 2021, 2020]; // Add more as needed
 
 export default function RewindSelectionPage() {
-  const { user } = useAuth(); // Check if user is logged in (for future features like progress)
+  const router = useRouter()
   const [selectedTeam, setSelectedTeam] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<number | '' >('');
   const [games, setGames] = useState<GameInfo[]>([]);
@@ -45,9 +45,10 @@ export default function RewindSelectionPage() {
       }
 
       setGames(data as GameInfo[]);
-    } catch (err: any) {
-      console.error("Failed to fetch games:", err);
-      setError(err.message || 'An unknown error occurred while fetching games.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to load game list';
+      console.error("Fetch games error:", err);
+      setError(message);
       setGames([]);
     } finally {
       setIsLoadingGames(false);

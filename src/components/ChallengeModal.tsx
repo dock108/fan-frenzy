@@ -59,9 +59,10 @@ export default function ChallengeModal({
       onSubmitSuccess(); // Trigger success callback (e.g., show confirmation)
       handleClose(); // Close modal
 
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
       console.error("Challenge submission error:", err);
-      setError(err.message || 'An unexpected error occurred.');
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }

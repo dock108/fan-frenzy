@@ -1,84 +1,32 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { Database } from "@/types/supabase"
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 
-export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next()
+  const supabase = createMiddlewareClient<Database>({ req, res })
+  const { data: { session } } = await supabase.auth.getSession();
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-        },
-      },
-    }
-  )
+  // Define public routes (keep definition for reference if needed)
+  // const publicRoutes = [\'/daily\', \'/rewind\', \'/rewind/play\', \'/shuffle\', \'/leaderboard\'] 
 
-  // Define protected routes (routes that *require* login)
-  const protectedRoutes = ['/dashboard']
+  const path = req.nextUrl.pathname
 
-  // Define public routes (accessible without login, beyond the defaults like /, /login)
-  const publicRoutes = ['/daily', '/rewind', '/rewind/play', '/shuffle', '/leaderboard']
-
-  const path = request.nextUrl.pathname
-
-  // Check if the user is authenticated
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // Redirect logged-in users from /login to /dashboard
-  if (user && path.startsWith('/login')) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+  // --- Simplified Logic --- 
+  // If trying to access a route that requires auth (e.g., /dashboard) without a session, redirect.
+  if (!session && path.startsWith('/dashboard')) { // Check specific protected routes
+    return NextResponse.redirect(new URL('/login', req.url))
   }
 
-  // Redirect unauthenticated users trying to access protected routes
-  if (!user && protectedRoutes.some(p => path.startsWith(p))) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // If logged in and accessing login/signup, redirect to dashboard.
+  if (session && (path === '/login' || path === '/signup')) {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
-  // Allow access to public routes and the base path (handled by matcher exclusion)
-  // No specific redirection needed here if the route is not protected and not /login
-
-  return response
+  // Otherwise, allow the request to proceed.
+  // No need to explicitly check public routes if the default is allow.
+  return res 
 }
 
 export const config = {

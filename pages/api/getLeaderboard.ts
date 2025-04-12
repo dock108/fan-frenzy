@@ -24,7 +24,7 @@ export interface LeaderboardResponse {
 
 export const dynamic = 'force-dynamic'; // Ensure fresh data on each request
 
-export async function GET(request: Request) {
+export async function GET(/* request: Request */) { // Removed unused 'request' parameter
   try {
     // Using Route Handler Client - careful with RLS for reads!
     // If RLS prevents reading scores/users, you might need a service role client here.
@@ -74,8 +74,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json(leaderboardData, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) { // Use unknown for generic catch
     console.error('API Route Error (getLeaderboard):', error);
-    return NextResponse.json({ message: `An unexpected error occurred: ${error.message}` }, { status: 500 });
+    // Type check for error message
+    const message = error instanceof Error ? error.message : 'An unknown error occurred';
+    return NextResponse.json({ message: `An unexpected error occurred: ${message}` }, { status: 500 });
   }
 } 

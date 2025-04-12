@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js' // Use standard client for 
 import path from 'path'
 import fs from 'fs/promises'
 import OpenAI from 'openai' // Import OpenAI library
+import { Database } from "@/types/supabase"
 
 // Ensure environment variables are loaded (especially for server-side client)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -29,6 +30,15 @@ type Moment = StartEndMoment | MultipleChoiceMoment;
 interface GameData {
     event_data: any; // Placeholder for scraped/API data or AI summary
     key_moments: Moment[];
+}
+
+interface GameCache {
+  game_id: string;
+  event_data: Record<string, unknown>; // Use Record<string, unknown> instead of any
+  key_moments: MultipleChoiceMoment[];
+  pbp_summary?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Helper function to get mock data (replace with real API/AI call later)
