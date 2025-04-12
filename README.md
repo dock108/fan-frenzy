@@ -97,10 +97,11 @@ The homepage (`/`) serves as the main entry point:
   - Checks `game_cache` table in Supabase for existing data.
   - If cached data exists, returns `event_data` and `key_moments`.
   - If not cached:
-    - Fetches placeholder play-by-play data.
-    - Sends PBP to OpenAI API (GPT-4o) to generate `key_moments` (requires `OPENAI_API_KEY`).
-    - Inserts the fetched/generated data into `game_cache` (requires `SUPABASE_SERVICE_ROLE_KEY`).
-    - Returns the freshly generated data.
+    - **AI Generation:** Calls OpenAI (GPT-4o) twice:
+        1.  To generate a play-by-play summary for the specified game.
+        2.  To extract `key_moments` from the generated PBP.
+    - Inserts the generated data (`event_data` including PBP, `key_moments`) into `game_cache` (requires `SUPABASE_SERVICE_ROLE_KEY`).
+    - Returns the generated data.
 
 ### Authentication
 

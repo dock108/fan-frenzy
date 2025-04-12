@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 - Integrated OpenAI API (GPT-4o) into `/api/fetchGame` to generate key moments from placeholder PBP on cache miss.
 
 ### Changed
+- Modified `/api/fetchGame` to use OpenAI for *both* PBP generation and key moment extraction on cache miss.
 - Updated Daily Challenge page to call `/api/saveScore` on completion for logged-in users.
 - Refactored Daily Challenge page (`/daily`) to fetch data from API instead of direct import.
 - Refactored Daily Challenge to a reactive 'fill-in-the-blanks' format: answers lock automatically on exact match, partial matches get debounced feedback.

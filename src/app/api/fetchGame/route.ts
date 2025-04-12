@@ -27,7 +27,7 @@ interface StartEndMoment extends MomentBase { type: 'start' | 'end'; context: st
 interface FillInMoment extends MomentBase { type: 'fill-in'; prompt: string; answer: string; importance: number; }
 type Moment = StartEndMoment | FillInMoment;
 interface GameData {
-    event_data: any; // Placeholder for scraped/API data
+    event_data: any; // Placeholder for scraped/API data or AI summary
     key_moments: Moment[];
 }
 
@@ -55,42 +55,85 @@ async function fetchMockGameData(team: string, year: string, gameId: string): Pr
 }
 
 // --- Placeholder for Play-by-Play Data --- 
-// In a real app, this would come from scraping or a sports API based on team/year/gameId
 const getPlaceholderPlayByPlay = (gameId: string): string => {
-    // For now, return a hardcoded string representing the Rutgers game
-    if (gameId === 'rutgers-vs-louisville-2006') { // Use a known ID for the mock
-        return `
-        Louisville vs. Rutgers - November 9, 2006 - Key Sequence Analysis
+    // ALWAYS return the Rutgers PBP for demo purposes, regardless of gameId
+    // console.log(`DEBUG: Using Rutgers PBP placeholder for requested gameId: ${gameId}`)
+    return `
+    Louisville vs. Rutgers - November 9, 2006 - Key Sequence Analysis
 
-        Mid-4th Quarter: Louisville leads 25-17. Rutgers drives.
-        Play: Ray Rice 2-yard TD run. Score: LOU 25, RUT 23.
-        Play: Rutgers 2-point conversion attempt FAILED.
-        
-        Following Possession: Louisville punts after 3 plays.
+    Mid-4th Quarter: Louisville leads 25-17. Rutgers drives.
+    Play: Ray Rice 2-yard TD run. Score: LOU 25, RUT 23.
+    Play: Rutgers 2-point conversion attempt FAILED.
+    
+    Following Possession: Louisville punts after 3 plays.
 
-        Final Drive (Rutgers): Starts near midfield, under 2 mins left.
-        Play: Ray Rice runs for small gain.
-        Play: Mike Teel pass incomplete.
-        Play: Mike Teel pass complete to Tiquan Underwood for 28 yards to LOU 7. (1st & Goal)
-        Play: Ray Rice run, no gain.
-        Play: Timeout Rutgers.
-        Play: Mike Teel pass incomplete.
-        Play: Mike Teel pass incomplete.
-        Play: Timeout Rutgers. (18 seconds left)
-        Play: Rutgers elects to kick FG on 4th & Goal from the 10.
-        Play: Jeremy Ito 28-yard Field Goal attempt IS GOOD. Score: RUT 28, LOU 25. (13 seconds left)
-        
-        Final Sequence: Louisville attempts final plays, game ends.
-        Final Score: Rutgers 28, Louisville 25.
-        `;
+    Final Drive (Rutgers): Starts near midfield, under 2 mins left.
+    Play: Ray Rice runs for small gain.
+    Play: Mike Teel pass incomplete.
+    Play: Mike Teel pass complete to Tiquan Underwood for 28 yards to LOU 7. (1st & Goal)
+    Play: Ray Rice run, no gain.
+    Play: Timeout Rutgers.
+    Play: Mike Teel pass incomplete.
+    Play: Mike Teel pass incomplete.
+    Play: Timeout Rutgers. (18 seconds left)
+    Play: Rutgers elects to kick FG on 4th & Goal from the 10.
+    Play: Jeremy Ito 28-yard Field Goal attempt IS GOOD. Score: RUT 28, LOU 25. (13 seconds left)
+    
+    Final Sequence: Louisville attempts final plays, game ends.
+    Final Score: Rutgers 28, Louisville 25.
+    `;
+    // Removed the if check and the default error message return
+}
+
+// --- Function to Generate Play-by-Play with OpenAI --- 
+async function generatePlayByPlayWithAI(team: string, year: number, gameId: string, gameTitle: string): Promise<string> {
+    console.log(`[AI PBP Gen] Requesting PBP generation for ${gameTitle}...`);
+    const prompt = `
+Please generate a detailed, factual play-by-play summary for the final stages (e.g., last quarter or key final drives) of the following sports game:
+
+Game ID: ${gameId}
+Team: ${team}
+Year: ${year}
+Title: ${gameTitle}
+
+Focus on the sequence of plays that led to the final outcome. Include scores changing, key player actions (passes, runs, kicks, turnovers), timeouts, and final score. Present it as plain text.
+`;
+
+    try {
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                { role: "system", content: "You are a sports archivist providing detailed play-by-play summaries." },
+                { role: "user", content: prompt }
+            ],
+            temperature: 0.3, // Slightly higher temp for generation, but still aiming for factuality
+            max_tokens: 500, // Limit token usage
+        });
+
+        const pbpText = completion.choices[0]?.message?.content;
+
+        if (!pbpText) {
+            throw new Error('OpenAI PBP generation response content is missing.');
+        }
+
+        console.log(`[AI PBP Gen] Successfully generated PBP text for ${gameTitle}.`);
+        return pbpText.trim();
+
+    } catch (error: any) {
+        console.error("[AI PBP Gen] Error during OpenAI call:", error);
+        if (error.response) {
+            console.error("[AI PBP Gen] OpenAI Error Response:", error.response.data);
+        }
+        // Return a fallback message instead of throwing, allowing moment generation to try with limited info
+        // Or potentially throw here if PBP is absolutely required
+        // throw new Error(`AI PBP generation failed: ${error.message}`);
+        return `Error generating play-by-play for ${gameTitle}. Proceeding with moment generation based on title only.`;
     }
-    // Default placeholder if gameId doesn't match
-    return "Placeholder play-by-play data not available for this game.";
 }
 
 // --- Function to Process Data with OpenAI --- 
 async function generateKeyMomentsWithAI(playByPlayText: string, gameTitle: string): Promise<GameData> {
-    console.log("[AI Processing] Sending request to OpenAI GPT-4o...");
+    console.log("[AI Moments Gen] Sending request to OpenAI GPT-4o...");
     const systemPrompt = `
 You are an expert sports analyst. Given the following play-by-play text for a game, identify exactly 8-10 key moments that represent the critical narrative flow of the game's ending sequence. Structure these moments as a JSON object matching the specified GameData interface. 
 
@@ -114,12 +157,12 @@ Example Fill-In Moment:
   "importance": 9.2
 }
 
-Strictly adhere to the JSON structure and types. Ensure the prompts are questions and answers are concise facts from the text.
+Strictly adhere to the JSON structure and types. Ensure the prompts are questions and answers are concise facts from the text. If the provided Play-by-Play Text indicates an error during its generation, generate the best possible moments based on the game title alone.
 `;
 
     try {
         const completion = await openai.chat.completions.create({
-            model: "gpt-4o", // Use the desired model
+            model: "gpt-4o",
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: `Generate key moments for game: ${gameTitle}
@@ -127,57 +170,45 @@ Strictly adhere to the JSON structure and types. Ensure the prompts are question
 Play-by-Play Text:
 ${playByPlayText}` }
             ],
-            response_format: { type: "json_object" }, // Request JSON output
-            temperature: 0.2, // Lower temperature for more deterministic output
+            response_format: { type: "json_object" },
+            temperature: 0.2,
         });
 
         const jsonResponse = completion.choices[0]?.message?.content;
+        if (!jsonResponse) throw new Error('OpenAI moments response content is missing.');
 
-        if (!jsonResponse) {
-            throw new Error('OpenAI response content is missing.');
-        }
-
-        console.log("[AI Processing] Received response from OpenAI.");
-        // Attempt to parse the JSON response
+        console.log("[AI Moments Gen] Received response from OpenAI.");
         const parsedData = JSON.parse(jsonResponse);
 
-        // Basic validation of the parsed structure
         if (!parsedData.key_moments || !Array.isArray(parsedData.key_moments)) {
-            throw new Error('Invalid JSON structure: key_moments array is missing or not an array.');
+            throw new Error('Invalid JSON structure from AI: key_moments missing/invalid.');
         }
         if (!parsedData.event_data) {
-             console.warn("[AI Processing] event_data missing, using placeholder.");
              parsedData.event_data = { summary: "AI processed summary" };
         }
 
-        // Add more validation checks on moment structure if needed
-
-        console.log("[AI Processing] Successfully parsed AI response.");
+        console.log("[AI Moments Gen] Successfully parsed AI response.");
         return parsedData as GameData;
 
     } catch (error: any) {
-        console.error("[AI Processing] Error during OpenAI call or parsing:", error);
-        if (error.response) {
-            console.error("[AI Processing] OpenAI Error Response:", error.response.data);
-        }
-        throw new Error(`AI processing failed: ${error.message}`);
+        console.error("[AI Moments Gen] Error during OpenAI call or parsing:", error);
+        if (error.response) console.error("[AI Moments Gen] OpenAI Error Response:", error.response.data);
+        throw new Error(`AI moments generation failed: ${error.message}`);
     }
 }
 
+// --- Main API Route Handler --- 
 export async function GET(request: NextRequest) {
     if (!supabaseUrl || !supabaseServiceRoleKey || !openaiApiKey) {
         return NextResponse.json({ message: 'Server configuration error: Credentials missing.' }, { status: 500 });
     }
 
-    // Initialize Supabase client with service role for admin access
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
+    const { searchParams } = new URL(request.url);
+    const team = searchParams.get('team')?.toUpperCase();
+    const yearStr = searchParams.get('year');
+    const gameId = searchParams.get('gameId');
 
-    const { searchParams } = new URL(request.url)
-    const team = searchParams.get('team')?.toUpperCase()
-    const yearStr = searchParams.get('year')
-    const gameId = searchParams.get('gameId')
-
-    // Validate parameters
     if (!team || !yearStr || !gameId) {
         return NextResponse.json({ message: 'Bad Request: Missing team, year, or gameId.' }, { status: 400 });
     }
@@ -185,7 +216,6 @@ export async function GET(request: NextRequest) {
     if (isNaN(year)) {
          return NextResponse.json({ message: 'Bad Request: Invalid year format.' }, { status: 400 });
     }
-    // Add more validation as needed for team/gameId format
 
     try {
         // 1. Check Cache
@@ -201,33 +231,37 @@ export async function GET(request: NextRequest) {
             throw new Error(`Database error checking cache: ${cacheError.message}`);
         }
 
-        if (cachedGame && cachedGame.event_data && cachedGame.key_moments) {
+        if (cachedGame?.event_data && cachedGame?.key_moments) {
             console.log(`[API Fetch Game] Cache hit for ${gameId}. Returning cached data.`);
             return NextResponse.json(cachedGame as GameData);
         }
 
-        // 2. Cache Miss: Get Placeholder PBP & Process with AI
-        console.log(`[API Fetch Game] Cache miss for ${gameId}. Processing with AI.`);
-        const playByPlay = getPlaceholderPlayByPlay(gameId);
-        if (playByPlay.startsWith('Placeholder play-by-play data not available')) {
-            throw new Error(playByPlay); // Throw error if no placeholder exists
-        }
-
+        // 2. Cache Miss: Generate PBP with AI, then Generate Moments with AI
+        console.log(`[API Fetch Game] Cache miss for ${gameId}. Generating PBP and moments with AI.`);
         const gameTitle = `${team} ${year} - ${gameId}`; // Simple title for AI context
-        const processedGameData = await generateKeyMomentsWithAI(playByPlay, gameTitle);
+        
+        // Step 2a: Generate Play-by-Play text using AI
+        const playByPlayText = await generatePlayByPlayWithAI(team, year, gameId, gameTitle);
+        
+        // Step 2b: Generate Key Moments based on the (potentially AI-generated) PBP
+        const processedGameData = await generateKeyMomentsWithAI(playByPlayText, gameTitle);
+        
+        // Add the generated PBP text to event_data for potential display/debugging
+        if (!processedGameData.event_data) processedGameData.event_data = {};
+        processedGameData.event_data.ai_generated_pbp = playByPlayText;
 
         // 3. Insert into Cache
-        console.log(`[API Fetch Game] Inserting AI-processed data into cache for ${gameId}.`);
+        console.log(`[API Fetch Game] Inserting AI-generated data into cache for ${gameId}.`);
         const { error: insertError } = await supabaseAdmin
             .from('game_cache')
             .insert({
                 source_game_id: gameId,
-                source_api: 'openai-gpt-4o-v1', // Indicate AI source
-                league: 'NCAA', // Or determine dynamically
-                event_data: processedGameData.event_data,
+                source_api: 'openai-gpt-4o-pbp-moments-v1', // Indicate full AI source
+                league: 'Unknown/AI', // TODO: Maybe ask AI for league?
+                event_data: processedGameData.event_data, // Includes PBP text now
                 key_moments: processedGameData.key_moments,
                 fetched_at: new Date().toISOString(),
-                needs_review: true // AI-generated data should be reviewed
+                needs_review: true // AI-generated data definitely needs review
             });
 
         if (insertError) {
