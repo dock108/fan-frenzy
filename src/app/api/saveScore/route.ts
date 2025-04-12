@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
 
   // Create a Supabase client configured to use cookies
   const supabase = createServerClient(
