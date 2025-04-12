@@ -16,8 +16,10 @@ All notable changes to this project will be documented in this file.
 - Implemented Daily Challenge game flow (/daily) using static JSON data (`src/data/daily-challenge.json`).
 - Added game state management, question/answer/reveal logic, and summary screen.
 - Implemented score saving to Supabase for logged-in users.
+- Created API route `/api/getDailyChallenge` to serve static challenge data.
 
 ### Changed
+- Refactored Daily Challenge page (`/daily`) to fetch data from API instead of direct import.
 - Refactored Daily Challenge to a reactive 'fill-in-the-blanks' format: answers lock automatically on exact match, partial matches get debounced feedback.
 - Removed login requirement for accessing the Daily Challenge (/daily).
 - Updated homepage CTA to always link to /daily.

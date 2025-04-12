@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import dailyChallengeData from '@/data/daily-challenge.json'
+// import dailyChallengeData from '@/data/daily-challenge.json' // Removed direct import
 import { supabase } from '@/utils/supabase'
 import toast from 'react-hot-toast'
 
@@ -36,53 +36,75 @@ const DEBOUNCE_DELAY = 1500; // ms
 export default function DailyChallengePage() {
   const { user, loading: authLoading } = useAuth()
   const [gameData, setGameData] = useState<GameData | null>(null)
+  const [isLoading, setIsLoading] = useState(true); // Loading state for fetch
+  const [error, setError] = useState<string | null>(null); // Error state for fetch
   const [userInputs, setUserInputs] = useState<string[]>([])
   const [isFinished, setIsFinished] = useState(false)
   const [lockedStates, setLockedStates] = useState<boolean[]>([])
   const [feedbackMessages, setFeedbackMessages] = useState<string[]>([])
   const [score, setScore] = useState(0)
-  const debounceTimers = useRef<(NodeJS.Timeout | number | null)[]>([]); // Ref to store timer IDs
+  const debounceTimers = useRef<(NodeJS.Timeout | number | null)[]>([]);
 
+  // Derived states need careful handling due to async data loading
   const fillInMoments = gameData?.moments.filter(m => m.type === 'fill-in') as FillInMoment[] || [];
   const startMoment = gameData?.moments.find(m => m.type === 'start') as StartEndMoment | undefined;
   const endMoment = gameData?.moments.find(m => m.type === 'end') as StartEndMoment | undefined;
 
+  // Fetch data and initialize state
   useEffect(() => {
-    // Load static data and initialize dependent states together
-    const loadedGameData = dailyChallengeData as GameData;
-    setGameData(loadedGameData);
+    const fetchGameData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch('/api/getDailyChallenge');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+        const loadedGameData: GameData = await response.json();
+        setGameData(loadedGameData);
 
-    const loadedFillInMoments = loadedGameData.moments.filter(m => m.type === 'fill-in') as FillInMoment[];
-    if (loadedFillInMoments.length > 0) {
-      setUserInputs(Array(loadedFillInMoments.length).fill(''));
-      setLockedStates(Array(loadedFillInMoments.length).fill(false));
-      setFeedbackMessages(Array(loadedFillInMoments.length).fill(''));
-      debounceTimers.current = Array(loadedFillInMoments.length).fill(null);
-    } else {
-      setUserInputs([]);
-      setLockedStates([]);
-      setFeedbackMessages([]);
-      debounceTimers.current = [];
-    }
+        // Initialize states based on fetched data
+        const loadedFillInMoments = loadedGameData.moments.filter(m => m.type === 'fill-in') as FillInMoment[];
+        if (loadedFillInMoments.length > 0) {
+          setUserInputs(Array(loadedFillInMoments.length).fill(''));
+          setLockedStates(Array(loadedFillInMoments.length).fill(false));
+          setFeedbackMessages(Array(loadedFillInMoments.length).fill(''));
+          debounceTimers.current = Array(loadedFillInMoments.length).fill(null);
+        } else {
+          setUserInputs([]);
+          setLockedStates([]);
+          setFeedbackMessages([]);
+          debounceTimers.current = [];
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch daily challenge:", err);
+        setError(err.message || 'An unknown error occurred while fetching the challenge.');
+        setGameData(null); // Ensure no stale data is shown
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGameData();
 
     // Cleanup timers on unmount
     return () => {
-        debounceTimers.current.forEach(timerId => {
-            if (timerId) clearTimeout(timerId as NodeJS.Timeout);
-        });
+      debounceTimers.current.forEach(timerId => {
+        if (timerId) clearTimeout(timerId as NodeJS.Timeout);
+      });
     };
-  }, []); // Run only once on mount
+  }, []);
 
   // Check for game completion whenever lockedStates changes
   useEffect(() => {
-    if (lockedStates.length > 0 && lockedStates.every(locked => locked)) {
+    if (!isLoading && lockedStates.length > 0 && lockedStates.every(locked => locked)) {
       setIsFinished(true);
       if (user) {
-        // Score is already calculated incrementally
-        saveScore(score, lockedStates.length); // Pass final score and correct count
+        saveScore(score, lockedStates.length);
       }
     }
-  }, [lockedStates, user, score]); // Added score dependency for saveScore
+  }, [lockedStates, user, score, isLoading]); // Add isLoading dependency
 
   // Debounced check function
   const debouncedCheck = useCallback((index: number, currentInputValue: string) => {
@@ -153,7 +175,6 @@ export default function DailyChallengePage() {
 
   const saveScore = async (finalScore: number, correctCount: number) => {
     if (!user || !gameData) return;
-    // Add bonus for correct answers (adjust multiplier as needed)
     const scoreWithBonus = finalScore + Math.round(correctCount * 5);
 
     try {
@@ -162,7 +183,7 @@ export default function DailyChallengePage() {
         .insert({
           user_id: user.id,
           game_id: gameData.gameId,
-          mode: 'daily-fill-in-reactive', // New mode identifier
+          mode: 'daily-fill-in-reactive',
           score: scoreWithBonus,
         })
       if (error) throw error
@@ -174,19 +195,31 @@ export default function DailyChallengePage() {
   }
 
   const restartGame = () => {
-    setUserInputs(Array(fillInMoments.length).fill(''));
-    setLockedStates(Array(fillInMoments.length).fill(false));
-    setFeedbackMessages(Array(fillInMoments.length).fill(''));
-    debounceTimers.current.forEach(timerId => {
-        if (timerId) clearTimeout(timerId as NodeJS.Timeout);
-    });
-    debounceTimers.current = Array(fillInMoments.length).fill(null);
+    setGameData(null); // Clear data to show loading
+    setIsLoading(true);
+    setError(null);
     setIsFinished(false);
     setScore(0);
+    // Trigger fetch again
+    // Note: This approach relies on the initial useEffect dependency array []
+    // A better approach might involve a dedicated function to fetch and reset.
+    window.location.reload(); // Simple way to force refetch for now
+  }
+
+  // --- Handle Loading and Error States --- //
+  if (isLoading) {
+      return <div className="container mx-auto p-4 text-center">Loading Daily Challenge...</div>
+  }
+
+  if (error) {
+      return <div className="container mx-auto p-4 text-center text-red-600">
+          Error loading challenge: {error}
+      </div>
   }
 
   if (!gameData || !startMoment || !endMoment) {
-    return <div className="container mx-auto p-4 text-center">Loading Challenge...</div>
+    // This case should ideally be covered by loading/error, but added as a fallback
+    return <div className="container mx-auto p-4 text-center">Challenge data is unavailable.</div>
   }
 
   // --- Render Game --- //
@@ -252,7 +285,7 @@ export default function DailyChallengePage() {
 
   // --- Render Summary Screen --- //
   if (isFinished) {
-    const correctCount = lockedStates.filter(Boolean).length; // All locked states are correct
+    const correctCount = lockedStates.filter(Boolean).length;
     const scoreWithBonus = score + Math.round(correctCount * 5);
 
     return (

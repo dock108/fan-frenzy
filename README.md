@@ -51,7 +51,7 @@ The homepage (`/`) serves as the main entry point:
 ### Daily Challenge (/daily)
 
 - **Static Data:** The current version uses static data from `src/data/daily-challenge.json` to simulate the game.
-- **Gameplay Format:** Fill-in-the-Blanks
+- **Data Fetching:** The `/daily` page fetches the challenge data from the `/api/getDailyChallenge` API route.
 - **Gameplay Format:** Reactive Fill-in-the-Blanks
     - Users are shown the context of a starting moment and an ending moment from a specific game.
     - Between these, a series of prompts are displayed, asking for key details (player name, play type, result, etc.) that occurred between the start and end points.
@@ -64,6 +64,13 @@ The homepage (`/`) serves as the main entry point:
   - The summary screen shows which answers were correct/incorrect and displays the correct answer for any misses.
 - **Scoring:** Points are awarded incrementally as each field is correctly locked, based on the moment's importance score.
 - **Summary:** The summary screen displays the final score and a recap of the correct answers for each prompt.
+
+### API Routes
+
+- **`/api/getDailyChallenge` (GET):**
+  - Returns the current daily challenge data.
+  - Currently serves the static content from `src/data/daily-challenge.json`.
+  - Includes basic error handling for file loading/parsing issues.
 
 ### Authentication
 
