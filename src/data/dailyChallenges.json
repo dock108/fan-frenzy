@@ -1,0 +1,825 @@
+[
+  {
+    "id": "2025-04-12",
+    "title": "Rams vs. Chiefs MNF Shootout (2018)",
+    "mode": "order",
+    "meta": {
+      "event_date": "2018-11-19",
+      "kickoff_et": "20:15",
+      "venue": "L.A. Memorial Coliseum"
+    },
+    "questions": [
+      {
+        "index": 0,
+        "type": "start",
+        "context": "A highly anticipated Monday Night Football game with massive offensive expectations."
+      },
+      {
+        "index": 1,
+        "type": "moment",
+        "text": "Patrick Mahomes zips a pass over the middle to Tyreek Hill for a touchdown",
+        "importance": 7
+      },
+      {
+        "index": 2,
+        "type": "moment",
+        "text": "Samson Ebukam scoops up a fumble and returns it for a Rams touchdown",
+        "importance": 8
+      },
+      {
+        "index": 3,
+        "type": "moment",
+        "text": "Mahomes finds Travis Kelce in the end zone after escaping pressure",
+        "importance": 8.5
+      },
+      {
+        "index": 4,
+        "type": "moment",
+        "text": "Allen Bailey recovers a fumble by Jared Goff, setting up a Chiefs scoring drive",
+        "importance": 7.5
+      },
+      {
+        "index": 5,
+        "type": "moment",
+        "text": "Tyreek Hill outruns the secondary on a deep touchdown from Mahomes; Goff answers with a strike to Gerald Everett",
+        "importance": 9
+      },
+      {
+        "index": 6,
+        "type": "moment",
+        "text": "Lamarcus Joyner jumps a sideline route and picks off Mahomes to halt a late drive",
+        "importance": 9.5
+      },
+      {
+        "index": 7,
+        "type": "moment",
+        "text": "Goff hits Gerald Everett in stride on a sideline throw that turns into a touchdown",
+        "importance": 10
+      },
+      {
+        "index": 8,
+        "type": "end",
+        "context": "Rams win a thriller 54-51."
+      }
+    ]
+  },
+  {
+    "id": "2025-04-13",
+    "title": "Colts vs. Patriots '4th & 2' Game (2009)",
+    "mode": "order",
+    "meta": {
+      "event_date": "2009-11-15",
+      "kickoff_et": "20:20",
+      "venue": "Lucas Oil Stadium"
+    },
+    "questions": [
+      {
+        "index": 0,
+        "type": "start",
+        "context": "A late-season matchup between undefeated Colts and the Patriots."
+      },
+      {
+        "index": 1,
+        "type": "moment",
+        "text": "Tom Brady fires a dart to Randy Moss in tight coverage for a Patriots touchdown",
+        "importance": 7
+      },
+      {
+        "index": 2,
+        "type": "moment",
+        "text": "Peyton Manning threads a touchdown pass to Pierre Garçon between two defenders",
+        "importance": 8
+      },
+      {
+        "index": 3,
+        "type": "moment",
+        "text": "Joseph Addai powers into the end zone through a crowded interior",
+        "importance": 8.5
+      },
+      {
+        "index": 4,
+        "type": "moment",
+        "text": "Patriots keep the offense on the field on a short-yardage situation near their own territory",
+        "importance": 10
+      },
+      {
+        "index": 5,
+        "type": "moment",
+        "text": "Kevin Faulk catches a short pass and is immediately wrapped up near the sticks",
+        "importance": 10
+      },
+      {
+        "index": 6,
+        "type": "moment",
+        "text": "Manning connects with Reggie Wayne on a crossing route for the go-ahead touchdown",
+        "importance": 9.5
+      },
+      {
+        "index": 7,
+        "type": "end",
+        "context": "Colts complete the comeback win 35-34 after the failed 4th down try."
+      }
+    ]
+  },
+  {
+    "id": "2025-04-14",
+    "title": "Vikings vs. Saints Wild Card OT (2020)",
+    "mode": "order",
+    "meta": {
+      "event_date": "2020-01-05",
+      "kickoff_et": "13:05",
+      "venue": "Mercedes-Benz Superdome"
+    },
+    "questions": [
+      {
+        "index": 0,
+        "type": "start",
+        "context": "A tense NFC Wild Card matchup."
+      },
+      {
+        "index": 1,
+        "type": "moment",
+        "text": "Dalvin Cook powers through contact and stretches across the goal line for a touchdown",
+        "importance": 7
+      },
+      {
+        "index": 2,
+        "type": "moment",
+        "text": "Taysom Hill slips behind the defense and hauls in a touchdown pass on a deep shot",
+        "importance": 7.5
+      },
+      {
+        "index": 3,
+        "type": "moment",
+        "text": "Saints cap a long drive with a clutch field goal to keep the game alive",
+        "importance": 9
+      },
+      {
+        "index": 4,
+        "type": "moment",
+        "text": "Minnesota wins the overtime coin toss and takes the ball",
+        "importance": 7
+      },
+      {
+        "index": 5,
+        "type": "moment",
+        "text": "Kirk Cousins launches a deep ball to Adam Thielen, who makes a contested grab downfield",
+        "importance": 9.5
+      },
+      {
+        "index": 6,
+        "type": "moment",
+        "text": "Kyle Rudolph fends off tight coverage and high-points a fade route in the end zone",
+        "importance": 10
+      },
+      {
+        "index": 7,
+        "type": "end",
+        "context": "Vikings upset the Saints 26-20 in overtime."
+      }
+    ]
+  },
+  {
+    "id": "2025-04-15",
+    "title": "Jets vs. Browns (Mayfield Debut Comeback) (2018)",
+    "mode": "order",
+    "meta": {
+      "event_date": "2018-09-20",
+      "kickoff_et": "20:20",
+      "venue": "FirstEnergy Stadium"
+    },
+    "questions": [
+      {
+        "index": 0,
+        "type": "start",
+        "context": "The Browns sought their first win in 635 days."
+      },
+      {
+        "index": 1,
+        "type": "moment",
+        "text": "Tyrod Taylor exits the game after taking a hit while scrambling",
+        "importance": 7
+      },
+      {
+        "index": 2,
+        "type": "moment",
+        "text": "Baker Mayfield enters and completes back-to-back passes to spark the crowd",
+        "importance": 8
+      },
+      {
+        "index": 3,
+        "type": "moment",
+        "text": "On a trick play, Mayfield hauls in a two-point conversion pass on a Philly Special-style play",
+        "importance": 9.5
+      },
+      {
+        "index": 4,
+        "type": "moment",
+        "text": "Carlos Hyde bursts through the middle and dives across the goal line",
+        "importance": 9
+      },
+      {
+        "index": 5,
+        "type": "moment",
+        "text": "Terrance Mitchell snags a Darnold pass on a diving interception to seal the win",
+        "importance": 8
+      },
+      {
+        "index": 6,
+        "type": "end",
+        "context": "Browns win 21-17, snapping the long winless streak."
+      }
+    ]
+  },
+  {
+    "id": "2025-04-16",
+    "title": "Packers vs. Cowboys Divisional (Cook Toe-Tap) (2017)",
+    "mode": "order",
+    "meta": {
+      "event_date": "2017-01-15",
+      "kickoff_et": "16:40",
+      "venue": "AT&T Stadium"
+    },
+    "questions": [
+      {
+        "index": 0,
+        "type": "start",
+        "context": "A back-and-forth NFC Divisional playoff game."
+      },
+      {
+        "index": 1,
+        "type": "moment",
+        "text": "Aaron Rodgers hits Richard Rodgers in the end zone to extend Green Bay's lead",
+        "importance": 7
+      },
+      {
+        "index": 2,
+        "type": "moment",
+        "text": "Dak Prescott connects with Dez Bryant on a deep strike as Dallas claws back",
+        "importance": 7.5
+      },
+      {
+        "index": 3,
+        "type": "moment",
+        "text": "Rodgers escapes pressure and flings a strike toward the sideline on a desperation heave",
+        "importance": 10
+      },
+      {
+        "index": 4,
+        "type": "moment",
+        "text": "Jared Cook drags his toes while fully extending to secure a sideline catch",
+        "importance": 10
+      },
+      {
+        "index": 5,
+        "type": "moment",
+        "text": "Mason Crosby drills a long field goal off his right foot as defenders bear down",
+        "importance": 9.5
+      },
+      {
+        "index": 6,
+        "type": "end",
+        "context": "Packers win 34-31 on a last-second field goal."
+      }
+    ]
+  },
+  {
+    "id": "2025-04-17",
+    "title": "USA vs. Algeria World Cup (Donovan Goal) (2010)",
+    "mode": "order",
+    "meta": {
+      "event_date": "2010-06-23",
+      "kickoff_et": "10:00",
+      "venue": "Loftus Versfeld Stadium, Pretoria"
+    },
+    "questions": [
+      {
+        "index": 0,
+        "type": "start",
+        "context": "USA needed a win to advance from the World Cup group stage."
+      },
+      {
+        "index": 1,
+        "type": "moment",
+        "text": "A US goal is waved off as the assistant referee raises the flag for offside",
+        "importance": 7
+      },
+      {
+        "index": 2,
+        "type": "moment",
+        "text": "Tim Howard grabs a loose ball and launches a pinpoint throw to start a counter attack",
+        "importance": 8
+      },
+      {
+        "index": 3,
+        "type": "moment",
+        "text": "Both teams miss chances as the scoreless deadlock continues late into the match",
+        "importance": 9
+      },
+      {
+        "index": 4,
+        "type": "moment",
+        "text": "Clint Dempsey's low shot is deflected by the keeper and the rebound stays in play",
+        "importance": 9
+      },
+      {
+        "index": 5,
+        "type": "moment",
+        "text": "Landon Donovan sprints into the box and calmly puts away a rebound into the net",
+        "importance": 10
+      },
+      {
+        "index": 6,
+        "type": "end",
+        "context": "USA wins 1-0 and dramatically tops the group."
+      }
+    ]
+  },
+  {
+    "id": "2025-04-18",
+    "title": "France vs. Argentina (2018) – World Cup Knockout Classic",
+    "mode": "order",
+    "meta": {
+      "event_date": "2018-06-30",
+      "kickoff_et": "10:00",
+      "venue": "Kazan Arena"
+    },
+    "questions": [
+      {
+        "index": 0,
+        "type": "start",
+        "context": "France and Argentina trade heavy punches in a World Cup knockout thriller."
+      },
+      {
+        "index": 1,
+        "type": "moment",
+        "text": "Griezmann draws contact at the edge of the box and calmly converts from the spot",
+        "importance": 8
+      },
+      {
+        "index": 2,
+        "type": "moment",
+        "text": "Di María rifles a left-footed shot from distance that swerves into the top corner",
+        "importance": 8.5
+      },
+      {
+        "index": 3,
+        "type": "moment",
+        "text": "Mercado redirects a shot that wrong-foots the keeper and gives Argentina the lead",
+        "importance": 9
+      },
+      {
+        "index": 4,
+        "type": "moment",
+        "text": "Pavard strikes a spinning volley from the right wing that curls past the outstretched keeper",
+        "importance": 10
+      },
+      {
+        "index": 5,
+        "type": "moment",
+        "text": "Mbappé controls a loose ball in the box and slides a low shot under the goalkeeper",
+        "importance": 9
+      },
+      {
+        "index": 6,
+        "type": "moment",
+        "text": "Mbappé finishes a sweeping team move by tucking a left-footed shot inside the near post",
+        "importance": 9
+      },
+      {
+        "index": 7,
+        "type": "end",
+        "context": "France holds off a late surge to eliminate Argentina in a seven-goal spectacle."
+      }
+    ]
+  },
+  {
+    "id": "2025-04-19",
+    "title": "Croatia vs. Russia (2018) – Extra Time and Penalty Drama",
+    "mode": "order",
+    "meta": {
+      "event_date": "2018-07-07",
+      "kickoff_et": "14:00",
+      "venue": "Fisht Olympic Stadium"
+    },
+    "questions": [
+      {
+        "index": 0,
+        "type": "start",
+        "context": "A World Cup quarterfinal that pushed both sides to the brink."
+      },
+      {
+        "index": 1,
+        "type": "moment",
+        "text": "Cheryshev cuts inside and curls a left-footed rocket into the top corner",
+        "importance": 8
+      },
+      {
+        "index": 2,
+        "type": "moment",
+        "text": "Kramarić glances a header beyond the keeper after a looping cross from the left",
+        "importance": 8
+      },
+      {
+        "index": 3,
+        "type": "moment",
+        "text": "Vida rises above the crowd and heads in a corner during a chaotic sequence",
+        "importance": 9
+      },
+      {
+        "index": 4,
+        "type": "moment",
+        "text": "Fernandes nods home a free kick from the right flank to bring it level again",
+        "importance": 9
+      },
+      {
+        "index": 5,
+        "type": "moment",
+        "text": "Subašić stretches low to his left to deny a penalty in the shootout",
+        "importance": 9.5
+      },
+      {
+        "index": 6,
+        "type": "moment",
+        "text": "Rakitić slots the final spot kick inside the post as the keeper guesses wrong",
+        "importance": 10
+      },
+      {
+        "index": 7,
+        "type": "end",
+        "context": "Croatia advances after a nerve-wracking shootout win."
+      }
+    ]
+  },
+  {
+    "id": "2025-04-20",
+    "title": "Portugal vs. Spain (2018) – Ronaldo’s Hat Trick",
+    "mode": "order",
+    "meta": {
+      "event_date": "2018-06-15",
+      "kickoff_et": "14:00",
+      "venue": "Fisht Olympic Stadium"
+    },
+    "questions": [
+      {
+        "index": 0,
+        "type": "start",
+        "context": "A legendary performance on the biggest group stage."
+      },
+      {
+        "index": 1,
+        "type": "moment",
+        "text": "Ronaldo earns a penalty after drawing contact at the edge of the box and buries it low",
+        "importance": 8
+      },
+      {
+        "index": 2,
+        "type": "moment",
+        "text": "Costa backs down a defender and rifles a shot past Rui Patrício",
+        "importance": 8
+      },
+      {
+        "index": 3,
+        "type": "moment",
+        "text": "Ronaldo whips a low shot under the keeper after a slick give-and-go",
+        "importance": 8.5
+      },
+      {
+        "index": 4,
+        "type": "moment",
+        "text": "Nacho meets a bouncing ball with a strike off the post and in",
+        "importance": 9
+      },
+      {
+        "index": 5,
+        "type": "moment",
+        "text": "Costa scores again by pouncing on a loose ball in the box",
+        "importance": 9
+      },
+      {
+        "index": 6,
+        "type": "moment",
+        "text": "Ronaldo curls a free kick around the wall and into the top corner to complete the hat trick",
+        "importance": 10
+      },
+      {
+        "index": 7,
+        "type": "end",
+        "context": "Portugal and Spain split points in one of the greatest group stage games ever."
+      }
+    ]
+  },
+  {
+    "id": "2025-04-21",
+    "title": "Giants vs. Reds NLDS Game 5 (2012) – Series-Clinching Finish",
+    "mode": "order",
+    "meta": {
+      "event_date": "2012-10-11",
+      "venue": "Great American Ball Park"
+    },
+    "questions": [
+      {
+        "index": 0,
+        "type": "start",
+        "context": "The series comes down to a winner-take-all Game 5 with late-inning tension building pitch by pitch."
+      },
+      {
+        "index": 1,
+        "type": "moment",
+        "text": "Buster Posey launches a grand slam that clanks off the foul pole in right",
+        "importance": 9
+      },
+      {
+        "index": 2,
+        "type": "moment",
+        "text": "The Reds chip away with a rally capped by a two-run single to left",
+        "importance": 8
+      },
+      {
+        "index": 3,
+        "type": "moment",
+        "text": "Brandon Crawford makes a diving stop to start a double play and kill momentum",
+        "importance": 8.5
+      },
+      {
+        "index": 4,
+        "type": "moment",
+        "text": "Sergio Romo takes the mound with runners aboard and one out",
+        "importance": 9
+      },
+      {
+        "index": 5,
+        "type": "moment",
+        "text": "Marco Scutaro squeezes a sky-high popup near second base to end the game",
+        "importance": 10
+      },
+      {
+        "index": 6,
+        "type": "end",
+        "context": "The Giants punch their ticket to the NLCS after surviving a tense ninth inning."
+      }
+    ]
+  },
+  {
+    "id": "2025-04-22",
+    "title": "Kings vs. Blackhawks WCF Game 7 OT (2014)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "Game 7 of the Western Conference Final between two dynasties." },
+      { "index": 1, "type": "moment", "text": "Chicago takes early 2-goal lead", "importance": 7 },
+      { "index": 2, "type": "moment", "text": "Kings tie game in 2nd period", "importance": 7.5 },
+      { "index": 3, "type": "moment", "text": "Blackhawks go up 4-3 entering 3rd period", "importance": 8 },
+      { "index": 4, "type": "moment", "text": "Kings force OT with goal in final minutes", "importance": 9 },
+      { "index": 5, "type": "moment", "text": "Alec Martinez scores series-winning goal in OT", "importance": 10 },
+      { "index": 6, "type": "end", "context": "Kings win 5-4 and advance to the Stanley Cup Final." }
+    ]
+  },
+  {
+    "id": "2025-04-23",
+    "title": "Blue Jackets Sweep Lightning Game 1 Comeback (2019)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "The Presidents' Trophy-winning Lightning face the underdog Blue Jackets." },
+      { "index": 1, "type": "moment", "text": "Tampa Bay jumps out to 3-0 lead", "importance": 7 },
+      { "index": 2, "type": "moment", "text": "Blue Jackets get first goal late in 2nd period", "importance": 7.5 },
+      { "index": 3, "type": "moment", "text": "Jones scores PPG to tie game 3-3", "importance": 9 },
+      { "index": 4, "type": "moment", "text": "Texier adds insurance goal", "importance": 8.5 },
+      { "index": 5, "type": "end", "context": "Columbus stuns Tampa Bay with 4-3 comeback win." }
+    ]
+  },
+  {
+    "id": "2025-04-24",
+    "title": "Penguins vs. Flyers Game 3 Fight-Fest (2012)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "A heated Game 3 between bitter rivals in the playoffs." },
+      { "index": 1, "type": "moment", "text": "Flyers take early lead", "importance": 7 },
+      { "index": 2, "type": "moment", "text": "Multiple fights break out after cheap shots", "importance": 9 },
+      { "index": 3, "type": "moment", "text": "Penguins score shorthanded but still trail big", "importance": 7.5 },
+      { "index": 4, "type": "moment", "text": "Game finishes with 158 total penalty minutes", "importance": 9.5 },
+      { "index": 5, "type": "end", "context": "Flyers win 8-4 and take a 3-0 series lead." }
+    ]
+  },
+  {
+    "id": "2025-04-25",
+    "title": "Flames vs. Oilers Battle of Alberta (2022)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "Game 1 of a long-awaited playoff Battle of Alberta." },
+      { "index": 1, "type": "moment", "text": "Flames score 3 goals in opening minutes", "importance": 7 },
+      { "index": 2, "type": "moment", "text": "Oilers answer with goals from McDavid & Draisaitl", "importance": 8.5 },
+      { "index": 3, "type": "moment", "text": "Flames and Oilers combine for 11 goals through two periods", "importance": 9 },
+      { "index": 4, "type": "moment", "text": "Calgary wins high-scoring shootout", "importance": 9.5 },
+      { "index": 5, "type": "end", "context": "Flames take Game 1, 9-6, in a wild opener." }
+    ]
+  },
+  {
+    "id": "2025-04-26",
+    "title": "Golden Knights vs. Sharks Game 7 Collapse (2019)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "Game 7 in the first round between Vegas and San Jose." },
+      { "index": 1, "type": "moment", "text": "Vegas leads 3-0 midway through 3rd", "importance": 7 },
+      { "index": 2, "type": "moment", "text": "Controversial major penalty called on Eakin", "importance": 9 },
+      { "index": 3, "type": "moment", "text": "Sharks score 4 goals during 5-minute power play", "importance": 10 },
+      { "index": 4, "type": "moment", "text": "Vegas ties it late to force OT", "importance": 8.5 },
+      { "index": 5, "type": "moment", "text": "Barclay Goodrow scores OT winner", "importance": 9 },
+      { "index": 6, "type": "end", "context": "Sharks complete a historic comeback to eliminate Vegas." }
+    ]
+  },
+  {
+    "id": "2025-04-27",
+    "title": "Yankees vs. Twins ALDS Game 2 Meltdown (2004)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "ALDS Game 2: Twins try to steal another in New York." },
+      { "index": 1, "type": "moment", "text": "Twins take lead into bottom of 12th", "importance": 7 },
+      { "index": 2, "type": "moment", "text": "Twins commit costly error to load bases", "importance": 8 },
+      { "index": 3, "type": "moment", "text": "A-Rod hits game-tying double", "importance": 9 },
+      { "index": 4, "type": "moment", "text": "Hideki Matsui hits walk-off sac fly", "importance": 9.5 },
+      { "index": 5, "type": "end", "context": "Yankees win 7-6 and tie the series 1-1." }
+    ]
+  },
+  {
+    "id": "2025-04-28",
+    "title": "Giants vs. Reds NLDS Game 5 Comeback (2012)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "NLDS Game 5 decider with Giants on the road." },
+      { "index": 1, "type": "moment", "text": "Posey hits grand slam off Latos", "importance": 9 },
+      { "index": 2, "type": "moment", "text": "Reds mount late rally", "importance": 8 },
+      { "index": 3, "type": "moment", "text": "Reds have winning run at the plate in 9th", "importance": 8.5 },
+      { "index": 4, "type": "moment", "text": "Sergio Romo gets final out to clinch series", "importance": 9.5 },
+      { "index": 5, "type": "end", "context": "Giants win 6-4 and advance to the NLCS." }
+    ]
+  },
+  {
+    "id": "2025-04-29",
+    "title": "Mariners vs. Yankees (Ichiro Inside-the-Park HR) (2007)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "All-Star Game moment at AT&T Park." },
+      { "index": 1, "type": "moment", "text": "Ichiro hits ball off right field wall", "importance": 8 },
+      { "index": 2, "type": "moment", "text": "Ball takes weird carom past Griffey Jr.", "importance": 8.5 },
+      { "index": 3, "type": "moment", "text": "Ichiro rounds third and scores standing", "importance": 9 },
+      { "index": 4, "type": "end", "context": "Ichiro wins All-Star Game MVP with the first ever inside-the-park HR in ASG history." }
+    ]
+  },
+  {
+    "id": "2025-04-30",
+    "title": "Red Sox vs. Rays ALCS Game 5 Comeback (2008)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "Boston faces elimination down 3-1 in the ALCS." },
+      { "index": 1, "type": "moment", "text": "Rays lead 7-0 in 7th inning", "importance": 7 },
+      { "index": 2, "type": "moment", "text": "Ortiz hits 3-run HR to spark rally", "importance": 8.5 },
+      { "index": 3, "type": "moment", "text": "Drew ties game in 8th", "importance": 9 },
+      { "index": 4, "type": "moment", "text": "Crisp delivers go-ahead RBI", "importance": 9.5 },
+      { "index": 5, "type": "end", "context": "Red Sox win 8-7, largest postseason comeback in 80+ years." }
+    ]
+  },
+  {
+    "id": "2025-05-01",
+    "title": "Rangers vs. Blue Jays ALDS Game 5 (Bat Flip) (2015)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "ALDS Game 5 with chaos and tension." },
+      { "index": 1, "type": "moment", "text": "Strange error by Rangers on return throw allows go-ahead run", "importance": 8 },
+      { "index": 2, "type": "moment", "text": "Fans litter field with trash", "importance": 8.5 },
+      { "index": 3, "type": "moment", "text": "Bautista crushes 3-run homer to take lead", "importance": 10 },
+      { "index": 4, "type": "moment", "text": "Bautista delivers iconic bat flip", "importance": 10 },
+      { "index": 5, "type": "end", "context": "Blue Jays win series in a game full of drama and iconic moments." }
+    ]
+  },
+  {
+    "id": "2025-05-02",
+    "title": "Kansas vs. Memphis NCAA Title Game (2008)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "National Championship game between Kansas and Memphis." },
+      { "index": 1, "type": "moment", "text": "Memphis takes 9-point lead with 2 minutes left", "importance": 9 },
+      { "index": 2, "type": "moment", "text": "Kansas begins late full-court press and rally", "importance": 8 },
+      { "index": 3, "type": "moment", "text": "Memphis misses key free throws", "importance": 9.5 },
+      { "index": 4, "type": "moment", "text": "Mario Chalmers hits game-tying 3-pointer", "importance": 10 },
+      { "index": 5, "type": "moment", "text": "Kansas dominates overtime period", "importance": 9 },
+      { "index": 6, "type": "end", "context": "Kansas wins 75-68 in OT to claim the national title." }
+    ]
+  },
+  {
+    "id": "2025-05-03",
+    "title": "Gonzaga vs. UCLA Final Four (2021)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "Final Four game between undefeated Gonzaga and Cinderella UCLA." },
+      { "index": 1, "type": "moment", "text": "Teams trade baskets and lead changes all game", "importance": 8 },
+      { "index": 2, "type": "moment", "text": "Game tied at end of regulation", "importance": 9 },
+      { "index": 3, "type": "moment", "text": "Juzang scores to tie in final seconds of OT", "importance": 9.5 },
+      { "index": 4, "type": "moment", "text": "Jalen Suggs banks in buzzer-beater from near half court", "importance": 10 },
+      { "index": 5, "type": "end", "context": "Gonzaga advances to title game with a 93-90 OT win." }
+    ]
+  },
+  {
+    "id": "2025-05-04",
+    "title": "Florida Gulf Coast vs. Georgetown (Dunk City) (2013)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "15-seed Florida Gulf Coast takes on 2-seed Georgetown." },
+      { "index": 1, "type": "moment", "text": "FGCU takes halftime lead with highlight dunks", "importance": 8 },
+      { "index": 2, "type": "moment", "text": "Sherwood Brown and Brett Comer run fast break clinic", "importance": 8.5 },
+      { "index": 3, "type": "moment", "text": "FGCU goes on 21-2 second half run", "importance": 9 },
+      { "index": 4, "type": "moment", "text": "Final alley-oop seals the upset", "importance": 9.5 },
+      { "index": 5, "type": "end", "context": "FGCU wins 78-68 and becomes first 15-seed to reach Sweet 16." }
+    ]
+  },
+  {
+    "id": "2025-05-05",
+    "title": "Syracuse vs. Virginia Elite Eight Comeback (2016)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "10-seed Syracuse faces 1-seed Virginia in the Elite Eight." },
+      { "index": 1, "type": "moment", "text": "Virginia leads by 15 in the second half", "importance": 8 },
+      { "index": 2, "type": "moment", "text": "Syracuse switches to full-court press", "importance": 8.5 },
+      { "index": 3, "type": "moment", "text": "Malachi Richardson hits key threes", "importance": 9 },
+      { "index": 4, "type": "moment", "text": "Syracuse takes lead late", "importance": 9.5 },
+      { "index": 5, "type": "end", "context": "Syracuse completes shocking comeback to reach the Final Four." }
+    ]
+  },
+  {
+    "id": "2025-05-06",
+    "title": "VCU vs. Kansas Elite Eight Upset (2011)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "VCU continues Cinderella run vs. #1 seed Kansas." },
+      { "index": 1, "type": "moment", "text": "VCU hits early threes to build double-digit lead", "importance": 8 },
+      { "index": 2, "type": "moment", "text": "Kansas cuts deficit but can’t tie it", "importance": 8.5 },
+      { "index": 3, "type": "moment", "text": "VCU holds Kansas to 2-for-21 from three", "importance": 9 },
+      { "index": 4, "type": "moment", "text": "Final steal and dunk seals game", "importance": 9.5 },
+      { "index": 5, "type": "end", "context": "VCU reaches Final Four as an 11-seed with 71-61 win." }
+    ]
+  },
+  {
+    "id": "2025-05-07",
+    "title": "Auburn vs. Georgia (Prayer at Jordan-Hare) (2013)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "Top-10 SEC matchup late in the season." },
+      { "index": 1, "type": "moment", "text": "Auburn dominates early and builds big lead", "importance": 7 },
+      { "index": 2, "type": "moment", "text": "Georgia scores 21 unanswered in 4th to take lead", "importance": 9 },
+      { "index": 3, "type": "moment", "text": "Auburn faces 4th & 18 from their own 27", "importance": 9.5 },
+      { "index": 4, "type": "moment", "text": "Marshall’s pass deflects off two defenders into WR's hands", "importance": 10 },
+      { "index": 5, "type": "end", "context": "Auburn wins 43-38 on one of the wildest Hail Marys ever." }
+    ]
+  },
+  {
+    "id": "2025-05-08",
+    "title": "Texas Tech vs. Texas (Crabtree TD) (2008)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "Battle of top-ranked Big 12 teams in Lubbock." },
+      { "index": 1, "type": "moment", "text": "Texas takes 33-32 lead with 1:29 left", "importance": 8 },
+      { "index": 2, "type": "moment", "text": "Tech drives down field with Harrell at QB", "importance": 8.5 },
+      { "index": 3, "type": "moment", "text": "Crabtree catches pass near sideline and stays in", "importance": 9.5 },
+      { "index": 4, "type": "moment", "text": "Crabtree scores game-winning TD with 1 second left", "importance": 10 },
+      { "index": 5, "type": "end", "context": "Texas Tech upsets No. 1 Texas 39-33." }
+    ]
+  },
+  {
+    "id": "2025-05-09",
+    "title": "LSU vs. Texas A&M 7OT Game (2018)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "Final game of regular season turns into historic marathon." },
+      { "index": 1, "type": "moment", "text": "Game tied 31-31 at end of regulation", "importance": 8 },
+      { "index": 2, "type": "moment", "text": "Both teams trade touchdowns in OTs", "importance": 9 },
+      { "index": 3, "type": "moment", "text": "Controversial call keeps A&M drive alive", "importance": 9.5 },
+      { "index": 4, "type": "moment", "text": "A&M scores 2-point conversion to win in 7th OT", "importance": 10 },
+      { "index": 5, "type": "end", "context": "Aggies win 74-72 in longest FBS game ever." }
+    ]
+  },
+  {
+    "id": "2025-05-10",
+    "title": "Boise State vs. Oklahoma Fiesta Bowl (2007)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "BCS underdog Boise State faces Oklahoma in Fiesta Bowl." },
+      { "index": 1, "type": "moment", "text": "Oklahoma takes late 35-28 lead", "importance": 8 },
+      { "index": 2, "type": "moment", "text": "Boise converts 4th & 18 on hook-and-ladder", "importance": 9 },
+      { "index": 3, "type": "moment", "text": "Game tied and goes to OT", "importance": 9.5 },
+      { "index": 4, "type": "moment", "text": "Statue of Liberty play wins game on 2-point try", "importance": 10 },
+      { "index": 5, "type": "end", "context": "Boise State pulls off one of the greatest upsets in CFB history." }
+    ]
+  },
+  {
+    "id": "2025-05-11",
+    "title": "Michigan State vs. Michigan Punt Mishap (2015)",
+    "mode": "order",
+    "questions": [
+      { "index": 0, "type": "start", "context": "Bitter rivals face off in defensive battle." },
+      { "index": 1, "type": "moment", "text": "Michigan leads 23-21 with 10 seconds left", "importance": 8 },
+      { "index": 2, "type": "moment", "text": "Michigan prepares to punt from own 40", "importance": 8.5 },
+      { "index": 3, "type": "moment", "text": "Snap is low, punter bobbles the ball", "importance": 9 },
+      { "index": 4, "type": "moment", "text": "MSU returns fumble for TD as time expires", "importance": 10 },
+      { "index": 5, "type": "end", "context": "Spartans stun Wolverines with 27-23 walk-off win." }
+    ]
+  }
+]

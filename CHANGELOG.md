@@ -5,6 +5,12 @@ All notable changes to the FanFrenzy project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Cleanup for Daily Challenge Public Beta
+- Removed unused pages: Rewind, Shuffle, Leaderboard, Login
+- Removed Supabase/Auth logic
+- Deleted legacy routes and demo pages
+- Cleaned up assets, components, and middleware
+
 ## [Unreleased]
 
 ### Added
@@ -84,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Daily Challenge page with smooth transitions.
 - Added links to transition demo from homepage and team theme page.
 - Updated README with transition system documentation.
+- Added multi-format Daily Challenge support with 30-day static dataset.
 
 ### Changed
 - Refactored homepage (/) to use new immersive dashboard design.
@@ -107,6 +114,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Redesigned Leaderboard with rank indicators, mobile responsiveness, and clean styling.
 - Completed mobile responsiveness and touch UX polish across all game modes.
 - Restored immediate interactive feedback (locking inputs) to Daily Challenge.
+- Removed dark mode toggle and related styling.
+- Removed old `/play` page in favor of dynamic `/daily` page.
 
 ### Fixed
 - Resolved minor styling issues in Navbar.
@@ -114,4 +123,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resolved Module Not Found error for `@heroicons/react`.
 - Corrected invalid `transitionMode` prop in Daily Challenge.
 - Removed unnecessary scroll behavior on homepage.
-- Resolved build errors related to `@next/font`
+- Resolved build errors related to `@next/font`.
+- Resolved build error related to missing ThemeToggle component.
+- Corrected sticky footer implementation.
+
+### Security
+
+---
+
+## [Previous Version - e.g., 0.1.0] - YYYY-MM-DD
+
+*Initial setup, basic fill-in game logic.*

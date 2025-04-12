@@ -1,66 +1,96 @@
-import { NextResponse } from 'next/server'
-import path from 'path'
-import fs from 'fs/promises'
+import { NextResponse } from 'next/server';
+import path from 'path';
+import fs from 'fs/promises'; // Using promises version of fs
 
-// Define the expected structure of the JSON data for type safety
-interface MomentBase {
+// Define the structure of a challenge based on your JSON
+// (Adjust based on the final structure you used, including 'order' and 'position' modes)
+interface ChallengeBase {
+  id: string;
+  title: string;
+  mode: 'order' | 'position'; // Add other modes if necessary
+}
+
+interface OrderChallenge extends ChallengeBase {
+  mode: 'order';
+  questions: Array<{
     index: number;
-    type: 'start' | 'fill-in' | 'end';
-}
-interface StartEndMoment extends MomentBase {
-    type: 'start' | 'end';
-    context: string;
-}
-interface FillInMoment extends MomentBase {
-    type: 'fill-in';
-    prompt: string;
-    answer: string;
-    importance: number;
-}
-type Moment = StartEndMoment | FillInMoment;
-interface GameData {
-    gameId: string;
-    title: string;
-    moments: Moment[];
+    type: 'start' | 'moment' | 'end';
+    text?: string; // For 'moment'
+    context?: string; // For 'start'/'end'
+    importance?: number;
+  }>;
 }
 
-export async function GET() {
-    try {
-        // Construct the absolute path to the JSON file
-        // process.cwd() gives the root of the Next.js project
-        const jsonFilePath = path.join(process.cwd(), 'src', 'data', 'daily-challenge.json');
+interface PositionChallenge extends ChallengeBase {
+  mode: 'position';
+  scenario: string;
+  fixedPlayers: string[];
+  choices: string[];
+  correctPositions: string[];
+}
 
-        // Read the file content
-        const fileContent = await fs.readFile(jsonFilePath, 'utf-8');
+type Challenge = OrderChallenge | PositionChallenge;
 
-        // Parse the JSON content
-        const data: GameData = JSON.parse(fileContent);
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const requestedDate = searchParams.get('date');
+  const adminDate = searchParams.get('adminDate'); // Get potential admin date
 
-        // Return the data as a JSON response
-        return NextResponse.json(data);
+  let targetDate: string | null = null;
 
-    } catch (error) {
-        console.error('[API GET Daily Challenge] Error:', error);
-
-        // Determine the error type
-        let errorMessage = 'Failed to load daily challenge data.';
-        let statusCode = 500;
-
-        if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
-            errorMessage = 'Daily challenge data file not found.';
-            statusCode = 404;
-        } else if (error instanceof SyntaxError) {
-            errorMessage = 'Failed to parse daily challenge data file (invalid JSON).';
-            statusCode = 500;
-        }
-
-        // Return an error response
-        return NextResponse.json(
-            { message: errorMessage },
-            { status: statusCode }
-        );
+  // Prioritize adminDate only in non-production environments
+  if (process.env.NODE_ENV !== 'production' && adminDate) {
+    // Basic validation for adminDate format (YYYY-MM-DD)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(adminDate)) {
+      targetDate = adminDate;
+      console.log(`[Admin Override] Using date: ${targetDate}`); // Log admin usage
+    } else {
+       console.warn(`[Admin Override] Invalid adminDate format received: ${adminDate}`);
     }
+  }
+
+  // If adminDate wasn't used or was invalid, check for regular date param
+  if (!targetDate && requestedDate) {
+     // Basic validation for date format (YYYY-MM-DD)
+     if (/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)) {
+        targetDate = requestedDate;
+     } else {
+        console.warn(`Invalid date format received: ${requestedDate}`);
+     }
+  }
+
+  // If still no valid date, default to today
+  if (!targetDate) {
+    targetDate = new Date().toISOString().slice(0, 10);
+  }
+
+  try {
+    // Construct the path to the JSON file
+    // process.cwd() gives the root of the project
+    const jsonPath = path.join(process.cwd(), 'src', 'data', 'dailyChallenges.json');
+
+    // Read the file content
+    const jsonData = await fs.readFile(jsonPath, 'utf-8');
+
+    // Parse the JSON data
+    const challenges: Challenge[] = JSON.parse(jsonData);
+
+    // Find the challenge for the target date
+    const challenge = challenges.find(c => c.id === targetDate);
+
+    if (challenge) {
+      // Return the found challenge
+      return NextResponse.json(challenge);
+    } else {
+      // Return 404 if no challenge found for the date
+      return NextResponse.json({ message: `No challenge found for date: ${targetDate}` }, { status: 404 });
+    }
+  } catch (error) {
+    console.error('Error reading or parsing dailyChallenges.json:', error);
+    // Return 500 for server errors (e.g., file not found, invalid JSON)
+    return NextResponse.json({ message: 'Internal Server Error reading challenge data' }, { status: 500 });
+  }
 }
 
-// Optional: Prevent caching if the challenge data changes daily
-// export const dynamic = 'force-dynamic'; 
+// Prevent caching since challenge data depends on the current date
+export const dynamic = 'force-dynamic' 

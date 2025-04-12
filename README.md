@@ -1,5 +1,7 @@
 # FanFrenzy
 
+This branch represents the FanFrenzy public beta focused only on the Daily Challenge mode.
+
 A Next.js application to test your memory of legendary sports moments.
 
 Built with Next.js, Supabase, Tailwind CSS, and OpenAI.
@@ -463,3 +465,39 @@ The application utilizes Tailwind CSS for styling and layout. Key design princip
     *   **Background:** Blurred team-specific imagery (placeholder currently) with a gradient overlay using `--team-primary` and `--team-secondary`. Team logo watermark in the corner.
     *   **Theming:** UI elements like the progress bar, buttons, and potentially parts of the `MomentCard` use team colors set via CSS variables (`--team-primary`, `--team-secondary`, `--team-accent`) managed by the `useTeamTheme` hook.
 *   **Summary:** Results screen maintains the team's immersive background and uses team colors for highlighting score and CTAs.
+
+# FanFrenzy - Daily Challenge
+
+## Overview
+
+A web application where users participate in daily sports trivia challenges.
+
+## Features
+
+*   **Daily Challenge:** Fetches a new challenge each day.
+*   **Multiple Formats:** Supports different challenge types:
+    *   `order`: Users sequence historical sports moments chronologically.
+    *   `position`: Users place players or items into correct slots (e.g., lineup, rankings).
+*   **Static Data:** Currently uses a static JSON dataset for challenges.
+*   **Admin Date Override:** Allows overriding the challenge date for testing in development environments.
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+## Tech Stack
+
+*   Next.js
+*   React
+*   TypeScript
+*   Tailwind CSS
+
+## API Endpoints
+
+*   `GET /api/getDailyChallenge`: Fetches the challenge for the current date.
+    *   Query Params:
+        *   `date=YYYY-MM-DD` (Optional): Fetch challenge for a specific date.
+        *   `adminDate=YYYY-MM-DD` (Optional, Dev Only): Override the date used to fetch the challenge.
