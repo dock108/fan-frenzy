@@ -21,6 +21,8 @@ All notable changes to this project will be documented in this file.
 - Added Team Rewind selection page (`/rewind`) with team/year/game pickers.
 - Created API route `/api/getRewindGames` to serve static game list data.
 - Added placeholder page for Team Rewind gameplay (`/rewind/play`).
+- Added API route `/api/fetchGame` with Supabase caching logic (using mock data for misses).
+- Integrated OpenAI API (GPT-4o) into `/api/fetchGame` to generate key moments from placeholder PBP on cache miss.
 
 ### Changed
 - Updated Daily Challenge page to call `/api/saveScore` on completion for logged-in users.
@@ -28,6 +30,7 @@ All notable changes to this project will be documented in this file.
 - Refactored Daily Challenge to a reactive 'fill-in-the-blanks' format: answers lock automatically on exact match, partial matches get debounced feedback.
 - Removed login requirement for accessing the Daily Challenge (/daily).
 - Updated homepage CTA to always link to /daily.
+- Updated `/rewind/play` page to fetch game data via `/api/fetchGame`.
 
 ### Fixed
 - Fixed build errors related to Geist font installation and middleware environment variable loading. 

@@ -74,8 +74,8 @@ The homepage (`/`) serves as the main entry point:
     - Displays the list of available games.
 - **Gameplay (`/rewind/play?team=...&year=...&gameId=...`):**
     - Navigated to when a user selects a game from the list.
-    - Currently a placeholder page displaying the selected parameters.
-    - Future implementation will fetch specific game moment data and present the challenge.
+    - Fetches detailed game data (event summary, key moments) via `/api/fetchGame`.
+    - Currently displays fetched data structure as a placeholder for actual gameplay UI.
 
 ### API Routes
 
@@ -92,6 +92,15 @@ The homepage (`/`) serves as the main entry point:
   - Accepts `team` and `year` query parameters.
   - Attempts to read and return the contents of the corresponding static game list file (e.g., `src/data/games/[TEAM]_[YEAR].json`).
   - Includes error handling for missing files or invalid parameters.
+- **`/api/fetchGame` (GET):**
+  - Accepts `team`, `year`, `gameId` query parameters.
+  - Checks `game_cache` table in Supabase for existing data.
+  - If cached data exists, returns `event_data` and `key_moments`.
+  - If not cached:
+    - Fetches placeholder play-by-play data.
+    - Sends PBP to OpenAI API (GPT-4o) to generate `key_moments` (requires `OPENAI_API_KEY`).
+    - Inserts the fetched/generated data into `game_cache` (requires `SUPABASE_SERVICE_ROLE_KEY`).
+    - Returns the freshly generated data.
 
 ### Authentication
 
