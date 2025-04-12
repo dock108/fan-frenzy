@@ -79,6 +79,7 @@ The homepage (`/`) serves as the main entry point:
       - Users select an answer, reveal the correct one + explanation, and see the importance score.
       - Includes a "Skip" option with partial scoring.
     - **Summary:** Shows final score, correct/skipped count, and missed high-importance moments.
+    - **Score Saving:** If logged in, the final score and game breakdown are saved via `/api/saveRewindScore` upon completion.
 
 ### API Routes
 
@@ -105,6 +106,10 @@ The homepage (`/`) serves as the main entry point:
         2.  To extract multiple-choice `key_moments` from the generated PBP.
     - Inserts the generated data (`event_data` including PBP, `key_moments`) into `game_cache` (requires `SUPABASE_SERVICE_ROLE_KEY`).
     - Returns the generated data.
+- **`/api/saveRewindScore` (POST):**
+  - Accepts `{ gameId: string, score: number, totalMoments: number, skipped: number, correct: number }` in the request body.
+  - Requires user to be authenticated.
+  - Validates input and inserts the score and metadata into the `scores` table with `mode = 'rewind'`.
 
 ### Authentication
 

@@ -24,6 +24,8 @@ All notable changes to this project will be documented in this file.
 - Added API route `/api/fetchGame` with Supabase caching logic (using mock data for misses).
 - Integrated OpenAI API (GPT-4o) into `/api/fetchGame` to generate key moments from placeholder PBP on cache miss.
 - Implemented Team Rewind gameplay UI (`/rewind/play`) with multiple-choice format using data from `/api/fetchGame`.
+- Added API endpoint `/api/saveRewindScore` and integrated score saving into Team Rewind flow.
+- Added metadata columns (total_moments, correct_moments, skipped_moments) to `scores` table (`sql/update-scores-schema.sql`).
 
 ### Changed
 - Refactored `/api/fetchGame`'s AI moment generation to output multiple-choice format instead of fill-in-the-blanks.
@@ -36,4 +38,4 @@ All notable changes to this project will be documented in this file.
 - Updated `/rewind/play` page to fetch game data via `/api/fetchGame`.
 
 ### Fixed
-- Fixed build errors related to Geist font installation and middleware environment variable loading. 
+- Fixed build errors related to Geist font installation and middleware environment variable loading.

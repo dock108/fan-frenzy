@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '@/context/AuthContext' // If needed for saving scores later
 import toast from 'react-hot-toast'
 
@@ -49,6 +49,11 @@ export default function RewindPlayPage() {
   const [skippedMoments, setSkippedMoments] = useState<number[]>([]); // Store indices of skipped moments
   const [missedHighImportance, setMissedHighImportance] = useState<MultipleChoiceMoment[]>([]);
 
+  // Add state for score saving
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const scoreHasBeenSaved = useRef(false);
+
   // Fetch Game Data
   useEffect(() => {
       if (!team || !year || !gameId) {
@@ -59,7 +64,7 @@ export default function RewindPlayPage() {
       const fetchGame = async () => {
           setIsLoading(true);
           setError(null);
-          // Reset gameplay state on new fetch
+          scoreHasBeenSaved.current = false; // Reset save flag
           setCurrentMomentIndex(0);
           setSelectedAnswer(null);
           setIsRevealed(false);
@@ -68,6 +73,8 @@ export default function RewindPlayPage() {
           setIsFinished(false);
           setSkippedMoments([]);
           setMissedHighImportance([]);
+          setIsSaving(false); // Reset saving state
+          setSaveError(null);
 
           try {
               const response = await fetch(`/api/fetchGame?team=${team}&year=${year}&gameId=${gameId}`);
@@ -95,6 +102,50 @@ export default function RewindPlayPage() {
 
   const mcMoments = gameData?.key_moments.filter(m => m.type === 'mc') as MultipleChoiceMoment[] || [];
   const currentMoment = mcMoments[currentMomentIndex];
+
+  // --- Function to call the saveRewindScore API --- //
+  const saveRewindScoreAPI = useCallback(async () => {
+    if (!user || !gameId || !gameData || scoreHasBeenSaved.current || isSaving || !isFinished) return;
+
+    setIsSaving(true);
+    setSaveError(null);
+    scoreHasBeenSaved.current = true;
+
+    const payload = {
+        gameId: gameId,
+        score: score,
+        totalMoments: mcMoments.length,
+        skipped: skippedMoments.length,
+        correct: correctAnswersCount
+    };
+
+    try {
+      const response = await fetch('/api/saveRewindScore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || `API Error: ${response.status}`);
+
+      toast.success('Rewind score saved!');
+    } catch (err: any) {
+      console.error("Error saving rewind score via API:", err);
+      setSaveError(err.message || 'Failed to save rewind score.');
+      toast.error(`Save failed: ${err.message}`);
+      scoreHasBeenSaved.current = false; // Allow retry
+    } finally {
+      setIsSaving(false);
+    }
+  }, [user, gameId, score, mcMoments.length, skippedMoments.length, correctAnswersCount, isSaving, isFinished, gameData]);
+
+  // --- Trigger Save on Finish --- //
+  useEffect(() => {
+    if (isFinished && user && !scoreHasBeenSaved.current && !isSaving) {
+      saveRewindScoreAPI();
+    }
+  }, [isFinished, user, isSaving, saveRewindScoreAPI]);
 
   // --- Event Handlers --- //
   const handleSelectAnswer = (index: number) => {
@@ -135,8 +186,7 @@ export default function RewindPlayPage() {
           setCurrentMomentIndex(prev => prev + 1);
       } else {
           setIsFinished(true);
-          // TODO: Add score saving logic here if Rewind scores should be saved
-          // Similar to Daily Challenge, potentially call /api/saveScore with mode='rewind'
+          // Score saving is now handled by useEffect watching isFinished
       }
   }
 
@@ -236,7 +286,7 @@ export default function RewindPlayPage() {
 
   // --- Render Summary Screen --- //
   if (isFinished) {
-      const finalScore = score; // Base score + skip points
+      const finalScore = score;
       const momentsAttempted = mcMoments.length - skippedMoments.length;
     return (
       <div className="container mx-auto p-4">
@@ -248,11 +298,11 @@ export default function RewindPlayPage() {
           <p className="text-lg text-gray-700 mb-6">You skipped {skippedMoments.length} moment(s).</p>
 
           {missedHighImportance.length > 0 && (
-            <div className="mt-6 border-t pt-4 text-left">
+             <div className="mt-6 border-t pt-4 text-left">
               <h3 className="text-xl font-semibold mb-3 text-red-600 text-center">Key Moments Missed (Importance >= 8.5):</h3>
-              <ul className="list-disc list-inside space-y-2 text-gray-700">
+               <ul className="list-disc list-inside space-y-2 text-gray-700">
                 {missedHighImportance.map(moment => (
-                  <li key={moment.index}>
+                   <li key={moment.index}>
                     <span className="font-medium">Moment {moment.index + 1}:</span> {moment.question} (Importance: {moment.importance})
                   </li>
                 ))}
@@ -260,7 +310,25 @@ export default function RewindPlayPage() {
             </div>
           )}
 
-          {/* Add Save Score button/logic here if needed */}
+          {/* Save Status Indicator */}
+          {user && (
+            <div className="mt-4 h-6"> {/* Added fixed height to prevent layout shift */} 
+                {isSaving && <p className="text-blue-600 text-sm">Saving score...</p>}
+                {saveError && <p className="text-red-600 text-sm">Save failed: {saveError}</p>}
+                {!isSaving && scoreHasBeenSaved.current && !saveError && <p className="text-green-600 text-sm">Your score has been saved.</p>}
+                {!isSaving && !scoreHasBeenSaved.current && saveError && (
+                     <button
+                        onClick={saveRewindScoreAPI} // Allow retry
+                        className="text-sm text-indigo-600 hover:underline"
+                    >
+                        Retry Save?
+                    </button>
+                )}
+            </div>
+          )}
+          {!user && (
+            <p className="text-gray-500 text-sm mt-4">Log in to save your Rewind scores!</p>
+          )}
 
           <Link href="/rewind" className="mt-8 inline-block px-6 py-3 rounded-md text-lg font-semibold text-white bg-gray-600 hover:bg-gray-700 transition duration-300">
             Select Another Game
