@@ -219,9 +219,11 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
                                     stateClasses = 'bg-green-100 border-green-400 cursor-not-allowed'; 
                                   } else if (isFinal) {
                                       stateClasses = 
-                                        finalItemScore === 0 ? 'bg-red-50 border-red-300' :
-                                        finalItemScore <= 3 ? 'bg-yellow-50 border-yellow-300' : 
-                                        'bg-green-100 border-green-300';
+                                        finalItemScore === 0 ? 'bg-red-50 border-red-300' :          // 0 pts
+                                        finalItemScore === 1 ? 'bg-orange-50 border-orange-300' :    // 1 pt (Orange)
+                                        finalItemScore === 2 ? 'bg-yellow-50 border-yellow-300' :    // 2 pts (Yellow)
+                                        finalItemScore === 3 ? 'bg-lime-50 border-lime-300' :        // 3 pts (Lime)
+                                        'bg-green-100 border-green-300';                            // 4 pts (Green)
                                   } else if (isGuessSubmitted) {
                                       stateClasses = 'bg-gray-100 border-gray-300';
                                       if (currentItemScore === 2 || currentItemScore === 3) {
@@ -231,9 +233,15 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
                                       stateClasses = 'bg-blue-50 border-blue-200 hover:bg-blue-100 cursor-grab'; 
                                   }
                                   const textScoreClasses = isLocked ? 'text-green-800 font-medium' : 'text-gray-800';
+                                  
+                                  // Updated badge classes for distinct final scores
                                   const badgeClasses = isFinal ? 
-                                        (finalItemScore <= 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-300 text-green-800') : 
-                                        'bg-gray-100 text-gray-800';
+                                        (finalItemScore === 0 ? 'bg-red-100 text-red-800' :      // 0 pts
+                                         finalItemScore === 1 ? 'bg-orange-100 text-orange-800' : // 1 pt (Using Orange)
+                                         finalItemScore === 2 ? 'bg-yellow-100 text-yellow-800' : // 2 pts
+                                         finalItemScore === 3 ? 'bg-lime-100 text-lime-800' :   // 3 pts (Using Lime)
+                                         'bg-green-300 text-green-800')                         // 4 pts
+                                        : 'bg-gray-100 text-gray-800'; // Default/guess state
 
                                   return (
                                       <div
