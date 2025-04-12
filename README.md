@@ -51,12 +51,14 @@ The homepage (`/`) serves as the main entry point:
 ### Daily Challenge (/daily)
 
 - **Static Data:** The current version uses static data from `src/data/daily-challenge.json` to simulate the game.
-- **Gameplay:**
-  - Users are presented with a series of moments from a specific game/event.
-  - Each moment includes context, a multiple-choice question, and options.
-  - Users select an answer and click "Reveal".
-  - The correct answer, an explanation, and an AI-generated importance score are shown.
-  - Users progress through moments using the "Next Moment" button.
+- **Gameplay Format:** Fill-in-the-Blanks
+  - Users are shown the context of a starting moment and an ending moment from a specific game.
+  - Between these, a series of prompts are displayed, asking for key details (player name, play type, result, etc.) that occurred between the start and end points.
+  - Users type their answers into input fields for each prompt.
+  - After filling in the blanks, users click "Submit Guesses".
+- **Grading & Summary:**
+  - User inputs are compared against the correct answers (case-insensitive).
+  - The summary screen shows which answers were correct/incorrect and displays the correct answer for any misses.
 - **Scoring:**
   - Points are awarded based on the importance score of correctly answered moments.
   - A small bonus is added for each correct answer.

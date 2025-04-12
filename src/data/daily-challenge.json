@@ -1,62 +1,65 @@
 {
-  "gameId": "2004-alcs-g4",
-  "title": "2004 ALCS Game 4 – Red Sox vs Yankees",
+  "gameId": "2006-11-09-LOU-RUTG",
+  "title": "Nov 9, 2006 - #3 Louisville vs #15 Rutgers",
   "moments": [
     {
       "index": 0,
-      "context": "Bottom 9th, Yankees lead 4-3. Mariano Rivera enters. Red Sox are 3 outs from elimination.",
-      "question": "Who is the first batter Rivera faces?",
-      "options": [
-        "Johnny Damon",
-        "Mark Bellhorn",
-        "Kevin Millar",
-        "Orlando Cabrera"
-      ],
-      "answer": 2, // Kevin Millar drew a walk
-      "explanation": "Kevin Millar leads off the bottom of the 9th and draws a crucial walk against Mariano Rivera.",
-      "importance": 9.0
+      "type": "start",
+      "context": "START: Mid-4th quarter, Ray Rice's 2-yard TD run cuts Louisville's lead to 25-23 (Rutgers fails 2pt conversion)."
     },
     {
       "index": 1,
-      "context": "Runner on 1st (Dave Roberts pinch-running), 0 outs. Bill Mueller batting.",
-      "question": "What does Dave Roberts famously do next?",
-      "options": [
-        "Gets picked off",
-        "Steals second base",
-        "Advances on a wild pitch",
-        "Gets thrown out stealing"
-      ],
-      "answer": 1, // The famous steal
-      "explanation": "Dave Roberts steals second base, putting the tying run in scoring position. 'The Steal' is one of baseball's most iconic moments.",
-      "importance": 9.8
+      "type": "fill-in",
+      "prompt": "Result of Louisville's possession after the kickoff?",
+      "answer": "Punt",
+      "importance": 7.0
     },
     {
       "index": 2,
-      "context": "Runner on 2nd, 1 out. Bill Mueller singles up the middle.",
-      "question": "What is the result of the play?",
-      "options": [
-        "Dave Roberts scores, game tied 4-4",
-        "Dave Roberts is thrown out at the plate",
-        "Runner holds at third",
-        "Yankees turn a double play"
-      ],
-      "answer": 0, // Mueller ties the game
-      "explanation": "Bill Mueller singles, scoring Dave Roberts from second to tie the game 4-4, sending it to extra innings.",
-      "importance": 9.5
+      "type": "fill-in",
+      "prompt": "Key player on Rutgers' final drive *before* the deep pass?",
+      "answer": "Ray Rice",
+      "importance": 7.5
     },
     {
       "index": 3,
-      "context": "Bottom 12th, tied 4-4. David Ortiz at bat, runner on second.",
-      "question": "What does David Ortiz do?",
-      "options": [
-        "Strikes out",
-        "Hits a walk-off home run",
-        "Grounds into a double play",
-        "Draws a walk"
-      ],
-      "answer": 1, // Big Papi walk-off
-      "explanation": "David Ortiz hits a dramatic walk-off two-run homer in the bottom of the 12th inning, winning the game 6-4 for the Red Sox and keeping their season alive.",
-      "importance": 9.9
+      "type": "fill-in",
+      "prompt": "Recipient of Mike Teel's deep pass to get inside the 10?",
+      "answer": "Tiquan Underwood",
+      "importance": 9.2
+    },
+    {
+      "index": 4,
+      "type": "fill-in",
+      "prompt": "Result of Rutgers' 1st & Goal play from the 7?",
+      "answer": "No gain", 
+      "importance": 8.0
+    },
+     {
+      "index": 5,
+      "type": "fill-in",
+      "prompt": "Result of Rutgers' 2nd & Goal play?",
+      "answer": "Incomplete pass",
+      "importance": 8.2
+    },
+     {
+      "index": 6,
+      "type": "fill-in",
+      "prompt": "Result of Rutgers' 3rd & Goal play?",
+      "answer": "Incomplete pass",
+      "importance": 8.5
+    },
+     {
+      "index": 7,
+      "type": "fill-in",
+      "prompt": "Rutgers' decision on 4th & Goal from the 10?",
+      "answer": "Kick field goal",
+      "importance": 9.0
+    },
+    {
+      "index": 8,
+      "type": "end",
+      "context": "END: Kicker Jeremy Ito makes the 28-yard field goal, putting Rutgers ahead 28-25 with 13 seconds left. Rutgers holds on for the win."
     }
   ]
 } 
