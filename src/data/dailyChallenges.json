@@ -1,6 +1,88 @@
 [
   {
     "id": "2025-04-12",
+    "title": "Rutgers vs. Purdue (2021) – Harper Jr. Stuns the #1 Team",
+    "mode": "order",
+    "meta": {
+      "event_date": "2021-12-09",
+      "kickoff_et": "19:00",
+      "venue": "Jersey Mike's Arena"
+    },
+    "questions": [
+      {
+        "index": 0,
+        "type": "start",
+        "context": "The top-ranked team in the country rolls into Jersey Mike’s Arena for a Big Ten battle, but Rutgers comes out swinging."
+      },
+      {
+        "index": 1,
+        "type": "moment",
+        "text": "Mawot Mag buries a corner three off a kickout from Caleb McConnell, getting the home crowd into it early",
+        "importance": 7.5
+      },
+      {
+        "index": 2,
+        "type": "moment",
+        "text": "Oskar Palmquist splashes a deep three from the wing after a swing pass from Aundre Hyatt",
+        "importance": 7.5
+      },
+      {
+        "index": 3,
+        "type": "moment",
+        "text": "Clifford Omoruyi skies for a dunk off a dish from Paul Mulcahy",
+        "importance": 8
+      },
+      {
+        "index": 4,
+        "type": "moment",
+        "text": "Sasha Stefanovic drills a three from the right wing off a skip pass from Ethan Morton to increase the lead to double digits",
+        "importance": 8.5
+      },
+      {
+        "index": 5,
+        "type": "moment",
+        "text": "Ralph Agee gets separation on the left elbow and knocks down a jumper off a feed from Paul Mulcahy",
+        "importance": 8
+      },
+      {
+        "index": 6,
+        "type": "moment",
+        "text": "Jaden Ivey soars through the lane and slams it down, silencing the crowd momentarily",
+        "importance": 8.5
+      },
+      {
+        "index": 7,
+        "type": "moment",
+        "text": "Ron Harper Jr. threads a bounce pass to Mawot Mag for a dunk that ignites the bench",
+        "importance": 9
+      },
+      {
+        "index": 8,
+        "type": "moment",
+        "text": "Ron Harper Jr. spins into the midrange and knocks down a tough jumper to take the lead",
+        "importance": 9.5
+      },
+      {
+        "index": 9,
+        "type": "moment",
+        "text": "Trevion Williams muscles his way into the paint and drops in a quick layup to reclaim the advantage",
+        "importance": 9.5
+      },
+      {
+        "index": 10,
+        "type": "moment",
+        "text": "Ron Harper Jr. takes the inbounds, pushes up the court, splits two defenders, and drills a three from DEEP.",
+        "importance": 10
+      },
+      {
+        "index": 11,
+        "type": "end",
+        "context": "The building erupts as the home team takes down the nation’s #1 on a walk-off buzzer beater."
+      }
+    ]
+  },
+  {
+    "id": "2026-04-12",
     "title": "Rams vs. Chiefs MNF Shootout (2018)",
     "mode": "order",
     "meta": {
