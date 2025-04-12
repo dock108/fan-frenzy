@@ -23,7 +23,15 @@ export default function AppShell({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div 
+      className="flex flex-col min-h-screen bg-gray-50"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
+      }}
+    >
       {showHeader && (
         <header className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
           <div className="container mx-auto px-4 py-3">
@@ -71,12 +79,12 @@ export default function AppShell({
         </header>
       )}
       
-      {/* Main content - Reduced vertical padding */}
+      {/* Main content - Should now respect safe area padding from parent */}
       <main className="flex-grow container mx-auto px-4 py-4">
         {children}
       </main>
       
-      {/* Footer */}
+      {/* Footer - Should now respect safe area padding from parent */}
       {showFooter && (
         <footer className="bg-white border-t border-gray-200">
           <div className="container mx-auto px-4 py-6">

@@ -10,6 +10,11 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "FanFrenzy - Daily Challenge",
   description: "FanFrenzy: Your daily sports challenge game. Test your memory of iconic moments & legendary plays. Play today's sports trivia quiz!",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    viewportFit: 'cover',
+  },
 };
 
 export default function RootLayout({
