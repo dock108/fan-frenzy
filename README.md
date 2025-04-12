@@ -46,6 +46,14 @@ This project uses Supabase Auth for email/password authentication.
 - Session management is handled via context and middleware.
 - Ensure you have enabled the Email provider in your Supabase project settings.
 
+### Database Schema
+
+The initial database schema includes tables for `scores`, `challenges`, and `game_cache`.
+
+- **Schema Definition:** The SQL script to create these tables and their basic Row Level Security (RLS) policies is located in `sql/init-schema.sql`.
+- **Applying the Schema:** Run the contents of `sql/init-schema.sql` in your Supabase project's SQL Editor (Database -> SQL Editor) to set up the tables.
+- **RLS Policies:** Basic RLS policies are included to allow users to manage their own scores and challenges. Access to `game_cache` is initially restricted. Adjust policies as needed for your application's security requirements.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
