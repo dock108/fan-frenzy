@@ -71,6 +71,11 @@ The homepage (`/`) serves as the main entry point:
   - Returns the current daily challenge data.
   - Currently serves the static content from `src/data/daily-challenge.json`.
   - Includes basic error handling for file loading/parsing issues.
+- **`/api/saveScore` (POST):**
+  - Accepts `{ gameId: string, score: number }` in the request body.
+  - Requires user to be authenticated (checks Supabase session).
+  - Validates input and inserts the score into the `scores` table associated with the logged-in user.
+  - Called automatically by the Daily Challenge page upon completion if the user is logged in.
 
 ### Authentication
 

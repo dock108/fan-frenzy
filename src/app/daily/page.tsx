@@ -44,6 +44,9 @@ export default function DailyChallengePage() {
   const [feedbackMessages, setFeedbackMessages] = useState<string[]>([])
   const [score, setScore] = useState(0)
   const debounceTimers = useRef<(NodeJS.Timeout | number | null)[]>([]);
+  const [isSaving, setIsSaving] = useState(false); // State for saving process
+  const [saveError, setSaveError] = useState<string | null>(null); // State for save errors
+  const scoreHasBeenSaved = useRef(false); // Prevent duplicate saves
 
   // Derived states need careful handling due to async data loading
   const fillInMoments = gameData?.moments.filter(m => m.type === 'fill-in') as FillInMoment[] || [];
@@ -55,6 +58,7 @@ export default function DailyChallengePage() {
     const fetchGameData = async () => {
       setIsLoading(true);
       setError(null);
+      scoreHasBeenSaved.current = false; // Reset save flag on new game load
       try {
         const response = await fetch('/api/getDailyChallenge');
         if (!response.ok) {
@@ -96,15 +100,57 @@ export default function DailyChallengePage() {
     };
   }, []);
 
+  // Function to call the save score API
+  const saveScoreAPI = useCallback(async (finalScore: number) => {
+    if (!user || !gameData || scoreHasBeenSaved.current || isSaving) return;
+
+    setIsSaving(true);
+    setSaveError(null);
+    scoreHasBeenSaved.current = true; // Set flag immediately
+
+    try {
+      const response = await fetch('/api/saveScore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          gameId: gameData.gameId,
+          score: finalScore
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || `API Error: ${response.status}`);
+      }
+
+      toast.success('Score saved successfully!');
+      // console.log('Save successful:', result.message);
+    } catch (err: any) {
+      console.error("Error saving score via API:", err);
+      setSaveError(err.message || 'Failed to save score.');
+      toast.error(`Save failed: ${err.message}`);
+      scoreHasBeenSaved.current = false; // Allow retry if save failed
+    } finally {
+      setIsSaving(false);
+    }
+  }, [user, gameData, isSaving]); // Add isSaving to dependencies
+
   // Check for game completion whenever lockedStates changes
   useEffect(() => {
     if (!isLoading && lockedStates.length > 0 && lockedStates.every(locked => locked)) {
-      setIsFinished(true);
-      if (user) {
-        saveScore(score, lockedStates.length);
-      }
+        const isNewlyFinished = !isFinished; // Check if this is the transition moment
+        setIsFinished(true);
+        if (user && isNewlyFinished && !scoreHasBeenSaved.current) {
+            // Calculate final score (consistency with summary display)
+            const correctCount = lockedStates.filter(Boolean).length;
+            const scoreWithBonus = score + Math.round(correctCount * 5);
+            saveScoreAPI(scoreWithBonus); // Call API to save score
+        }
     }
-  }, [lockedStates, user, score, isLoading]); // Add isLoading dependency
+  }, [isLoading, lockedStates, user, score, isFinished, saveScoreAPI]); // Added dependencies
 
   // Debounced check function
   const debouncedCheck = useCallback((index: number, currentInputValue: string) => {
@@ -173,37 +219,18 @@ export default function DailyChallengePage() {
     }
   };
 
-  const saveScore = async (finalScore: number, correctCount: number) => {
-    if (!user || !gameData) return;
-    const scoreWithBonus = finalScore + Math.round(correctCount * 5);
-
-    try {
-      const { error } = await supabase
-        .from('scores')
-        .insert({
-          user_id: user.id,
-          game_id: gameData.gameId,
-          mode: 'daily-fill-in-reactive',
-          score: scoreWithBonus,
-        })
-      if (error) throw error
-      toast.success('Score saved!')
-    } catch (error: any) {
-      console.error("Error saving score:", error)
-      toast.error(`Failed to save score: ${error.message}`)
-    }
-  }
-
   const restartGame = () => {
     setGameData(null); // Clear data to show loading
     setIsLoading(true);
     setError(null);
     setIsFinished(false);
     setScore(0);
-    // Trigger fetch again
-    // Note: This approach relies on the initial useEffect dependency array []
-    // A better approach might involve a dedicated function to fetch and reset.
-    window.location.reload(); // Simple way to force refetch for now
+    // Reset save flags
+    scoreHasBeenSaved.current = false;
+    setIsSaving(false);
+    setSaveError(null);
+    // Trigger fetch again by reloading (simplest for now)
+    window.location.reload();
   }
 
   // --- Handle Loading and Error States --- //
@@ -296,7 +323,7 @@ export default function DailyChallengePage() {
           <p className="text-4xl font-bold text-indigo-600 mb-4">{scoreWithBonus}</p>
           <p className="text-lg text-gray-700 mb-6">You correctly identified all {fillInMoments.length} key moments!</p>
 
-          {/* Simplified summary - maybe just show score and prompts/answers again? */}
+          {/* Recap */}
           <div className="mt-6 border-t pt-4 text-left space-y-3">
              <h3 className="text-xl font-semibold mb-3 text-center">Recap:</h3>
             {fillInMoments.map((moment, index) => (
@@ -309,9 +336,23 @@ export default function DailyChallengePage() {
             ))}
           </div>
 
-          {user ? (
-              <p className="text-green-600 text-sm mt-4">Your score has been saved.</p>
-          ) : (
+          {/* Save Status Indicator */}
+          {user && (
+            <div className="mt-4">
+                {isSaving && <p className="text-blue-600 text-sm">Saving score...</p>}
+                {saveError && <p className="text-red-600 text-sm">Save failed: {saveError}</p>}
+                {!isSaving && scoreHasBeenSaved.current && !saveError && <p className="text-green-600 text-sm">Your score has been saved.</p>}
+                {!isSaving && !scoreHasBeenSaved.current && saveError && (
+                     <button
+                        onClick={() => saveScoreAPI(scoreWithBonus)} // Allow retry
+                        className="text-sm text-indigo-600 hover:underline"
+                    >
+                        Retry Save?
+                    </button>
+                )}
+            </div>
+          )}
+          {!user && (
             <p className="text-gray-500 text-sm mt-4">Log in to save your scores for future challenges!</p>
           )}
 
