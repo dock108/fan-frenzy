@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { 
     DragDropContext, 
     Droppable, 
@@ -66,7 +66,7 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
   };
 
   // Timer Start Logic
-  const onDragStart = (_start: DragStart) => {
+  const onDragStart = () => {
     if (!startTime && !showFinalResults) {
       const now = Date.now();
       setStartTime(now);
@@ -81,7 +81,7 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
   };
 
   // Timer Stop & Cleanup Logic
-  const stopTimer = () => {
+  const stopTimer = useCallback(() => {
     if (timerIntervalId.current) {
       clearInterval(timerIntervalId.current);
       timerIntervalId.current = null;
@@ -89,7 +89,7 @@ const DailyOrderingGame: React.FC<DailyOrderingGameProps> = ({ title, questions 
     if (startTime) {
         setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
     }
-  };
+  }, [startTime]);
 
   useEffect(() => {
     return () => stopTimer();
