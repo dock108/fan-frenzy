@@ -1,0 +1,23 @@
+[
+  {
+    "gameId": "ne-2023-wk1",
+    "week": 1,
+    "date": "2023-09-10",
+    "opponent": "PHI",
+    "result": "L 20-25"
+  },
+  {
+    "gameId": "ne-2023-wk2",
+    "week": 2,
+    "date": "2023-09-17",
+    "opponent": "MIA",
+    "result": "L 17-24"
+  },
+  {
+    "gameId": "ne-2023-wk3",
+    "week": 3,
+    "date": "2023-09-24",
+    "opponent": "NYJ",
+    "result": "W 15-10"
+  }
+] 

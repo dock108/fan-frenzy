@@ -18,6 +18,9 @@ All notable changes to this project will be documented in this file.
 - Implemented score saving to Supabase for logged-in users.
 - Created API route `/api/getDailyChallenge` to serve static challenge data.
 - Added API route `/api/saveScore` to save Daily Challenge results.
+- Added Team Rewind selection page (`/rewind`) with team/year/game pickers.
+- Created API route `/api/getRewindGames` to serve static game list data.
+- Added placeholder page for Team Rewind gameplay (`/rewind/play`).
 
 ### Changed
 - Updated Daily Challenge page to call `/api/saveScore` on completion for logged-in users.

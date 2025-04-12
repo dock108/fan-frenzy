@@ -27,6 +27,12 @@ export default function Header() {
               <Link href="/dashboard" className="hover:text-gray-300">
                 Dashboard
               </Link>
+              <Link href="/daily" className="hover:text-gray-300">
+                 Daily
+              </Link>
+              <Link href="/rewind" className="hover:text-gray-300">
+                 Rewind
+              </Link>
               <button
                 onClick={handleSignOut}
                 className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
@@ -35,9 +41,17 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <Link href="/login" className="hover:text-gray-300">
-              Login / Sign Up
-            </Link>
+            <>
+              <Link href="/daily" className="hover:text-gray-300">
+                 Daily
+              </Link>
+               <Link href="/rewind" className="hover:text-gray-300">
+                 Rewind
+              </Link>
+              <Link href="/login" className="hover:text-gray-300">
+                Login / Sign Up
+              </Link>
+            </>
           )}
         </div>
       </nav>

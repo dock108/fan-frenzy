@@ -54,21 +54,29 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // Define protected routes
+  // Define protected routes (routes that *require* login)
   const protectedRoutes = ['/dashboard']
 
-  // Check if the current path is protected and the user is not logged in
-  if (!user && protectedRoutes.some(path => request.nextUrl.pathname.startsWith(path))) {
-    // Redirect to login page
+  // Define public routes (accessible without login, beyond the defaults like /, /login)
+  const publicRoutes = ['/daily', '/rewind', '/rewind/play']
+
+  const path = request.nextUrl.pathname
+
+  // Check if the user is authenticated
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Redirect logged-in users from /login to /dashboard
+  if (user && path.startsWith('/login')) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // Redirect unauthenticated users trying to access protected routes
+  if (!user && protectedRoutes.some(p => path.startsWith(p))) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // If user is logged in and tries to access login page, redirect to dashboard
-  if (user && request.nextUrl.pathname.startsWith('/login')) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
+  // Allow access to public routes and the base path (handled by matcher exclusion)
+  // No specific redirection needed here if the route is not protected and not /login
 
   return response
 }

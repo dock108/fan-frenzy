@@ -65,6 +65,18 @@ The homepage (`/`) serves as the main entry point:
 - **Scoring:** Points are awarded incrementally as each field is correctly locked, based on the moment's importance score.
 - **Summary:** The summary screen displays the final score and a recap of the correct answers for each prompt.
 
+### Team Rewind
+
+- **Selection (`/rewind`):** Allows users to select a team and year.
+    - Uses static lists for teams (e.g., `NE`, `PHI`) and years (e.g., `2023`, `2022`).
+    - Fetches a list of games for the selected team/year from `/api/getRewindGames`.
+    - Currently uses static game lists (e.g., `src/data/games/NE_2023.json`).
+    - Displays the list of available games.
+- **Gameplay (`/rewind/play?team=...&year=...&gameId=...`):**
+    - Navigated to when a user selects a game from the list.
+    - Currently a placeholder page displaying the selected parameters.
+    - Future implementation will fetch specific game moment data and present the challenge.
+
 ### API Routes
 
 - **`/api/getDailyChallenge` (GET):**
@@ -76,6 +88,10 @@ The homepage (`/`) serves as the main entry point:
   - Requires user to be authenticated (checks Supabase session).
   - Validates input and inserts the score into the `scores` table associated with the logged-in user.
   - Called automatically by the Daily Challenge page upon completion if the user is logged in.
+- **`/api/getRewindGames` (GET):**
+  - Accepts `team` and `year` query parameters.
+  - Attempts to read and return the contents of the corresponding static game list file (e.g., `src/data/games/[TEAM]_[YEAR].json`).
+  - Includes error handling for missing files or invalid parameters.
 
 ### Authentication
 
@@ -83,7 +99,7 @@ This project uses Supabase Auth for email/password authentication.
 
 - Visit `/login` to sign up or log in.
 - The `/dashboard` route is protected and requires authentication.
-- The `/daily` route is public, but score saving requires login.
+- The `/daily`, `/rewind`, and `/rewind/play` routes are public.
 - Session management is handled via context and middleware.
 - Ensure you have enabled the Email provider in your Supabase project settings.
 

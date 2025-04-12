@@ -1,0 +1,23 @@
+[
+  {
+    "gameId": "phi-2022-wk1",
+    "week": 1,
+    "date": "2022-09-11",
+    "opponent": "DET",
+    "result": "W 38-35"
+  },
+  {
+    "gameId": "phi-2022-wk2",
+    "week": 2,
+    "date": "2022-09-19",
+    "opponent": "MIN",
+    "result": "W 24-7"
+  },
+    {
+    "gameId": "phi-2022-wk3",
+    "week": 3,
+    "date": "2022-09-25",
+    "opponent": "WAS",
+    "result": "W 24-8"
+  }
+] 
