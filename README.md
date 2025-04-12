@@ -37,12 +37,24 @@ This is a Next.js project bootstrapped with [`create-next-app`](https://github.c
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+### Homepage
+
+The homepage (`/`) serves as the main entry point:
+- Displays a welcome message and tagline.
+- Features a primary Call to Action (CTA) for the "Daily Challenge".
+- Includes placeholder cards for future "Team Rewind" and "Shuffle Mode" game modes.
+- **Authentication Flow:**
+  - If the user is logged out, clicking the Daily Challenge CTA redirects to the `/login` page.
+  - If the user is logged in, the CTA links directly to the `/daily` challenge page.
+- **Authentication Flow:** The Daily Challenge CTA always links to `/daily`. This page is accessible without login, but users need to log in to save scores.
+
 ### Authentication
 
 This project uses Supabase Auth for email/password authentication.
 
 - Visit `/login` to sign up or log in.
 - The `/dashboard` route is protected and requires authentication.
+- The `/daily` route is public, but score saving requires login.
 - Session management is handled via context and middleware.
 - Ensure you have enabled the Email provider in your Supabase project settings.
 

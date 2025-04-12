@@ -11,9 +11,12 @@ All notable changes to this project will be documented in this file.
 - Added basic session management with AuthContext.
 - Included react-hot-toast for notifications.
 - Created initial Supabase schema (scores, challenges, game_cache) with RLS policies in `sql/init-schema.sql`.
+- Added homepage (/) with Daily Challenge CTA, placeholders for other modes, and auth-aware navigation to /daily or /login.
+- Created placeholder /daily page.
 
 ### Changed
-- (No significant changes in this version yet)
+- Removed login requirement for accessing the Daily Challenge (/daily).
+- Updated homepage CTA to always link to /daily.
 
 ### Fixed
 - Fixed build errors related to Geist font installation and middleware environment variable loading. 
