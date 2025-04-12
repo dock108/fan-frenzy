@@ -1,427 +1,221 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import toast from 'react-hot-toast';
-import TransitionLayout from '@/components/layout/TransitionLayout';
-import { ArrowPathIcon, XCircleIcon, HomeIcon } from '@heroicons/react/24/solid';
-import Cookies from 'js-cookie';
+import Cookies from 'js-cookie'
+import TransitionLayout from '@/components/layout/TransitionLayout'
+import AdminDateSelector from '@/components/AdminDateSelector'
+import DailyOrderingGame from '@/components/DailyOrderingGame'
+import ScoringGuide from '@/components/ScoringGuide'
+import { ArrowPathIcon, XCircleIcon, HomeIcon, CheckCircleIcon } from '@heroicons/react/24/solid'
 
-interface MomentBase {
+// Simplified type definitions
+interface Moment { // Define Moment type if not imported globally
   index: number;
-  type: 'start' | 'fill-in' | 'end';
+  type: 'start' | 'moment' | 'end';
+  text?: string;
+  context?: string;
+  importance?: number;
 }
-
-interface StartEndMoment extends MomentBase {
-  type: 'start' | 'end';
-  context: string;
+interface ChallengeBase {
+  id: string
+  title: string
+  mode: 'order'; // Only 'order' mode supported now
+  meta?: {
+    event_date?: string;
+    kickoff_et?: string; // Optional kickoff time
+    venue?: string;
+    // Add other potential meta fields if needed
+  };
 }
+interface OrderChallenge extends ChallengeBase { questions: Moment[]; }
 
-interface FillInMoment extends MomentBase {
-  type: 'fill-in';
-  prompt: string;
-  answer: string;
-  importance: number;
-}
-
-interface GameData {
-  gameId: string;
-  title: string;
-  moments: (StartEndMoment | FillInMoment)[];
-}
-
-// --- Answer Variations Dictionary --- //
-// Maps canonical answer (lowercase) to acceptable variations (lowercase)
-const answerVariations: { [key: string]: string[] } = {
-  'incomplete pass': ['incompletion'],
-  'no gain': ['0 yards', 'nothing'],
-  'home run': ['homer'],
-  // Add more canonical answers and their variations here
-  // Example: 'interception': ['pick', 'picked off'],
-};
+type Challenge = OrderChallenge; // Only OrderChallenge
 
 const COOKIE_NAME = 'played_daily_challenge';
 
-// Function to calculate expiry date (next midnight)
-const getExpiryDate = () => {
-  const now = new Date();
-  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  return tomorrow;
-};
+function DailyChallengeContent() {
+  const searchParams = useSearchParams()
+  const adminDate = searchParams.get('adminDate')
 
-export default function PlayPage() {
-  const [gameData, setGameData] = useState<GameData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [userInputs, setUserInputs] = useState<string[]>([]);
-  const [lockedStates, setLockedStates] = useState<boolean[]>([]);
-  const [feedbackMessages, setFeedbackMessages] = useState<string[]>([]);
-  const [score, setScore] = useState(0);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [playerName, setPlayerName] = useState<string>('');
-  const scoreHasBeenSaved = useRef(false);
-  const debounceTimers = useRef<(NodeJS.Timeout | null)[]>([]);
-  
-  const [gameState, setGameState] = useState<'playing' | 'summary' | 'loading' | 'error'>('loading');
-
-  const fillInMoments = useMemo(() => 
-    gameData?.moments.filter(m => m.type === 'fill-in') as FillInMoment[] || []
-  , [gameData]);
-
-  const startMoment = useMemo(() => 
-    gameData?.moments.find(m => m.type === 'start') as StartEndMoment | undefined
-  , [gameData]);
-
-  const endMoment = useMemo(() => 
-    gameData?.moments.find(m => m.type === 'end') as StartEndMoment | undefined
-  , [gameData]);
+  const [challengeData, setChallengeData] = useState<Challenge | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [hasPlayedToday, setHasPlayedToday] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchGameData = async () => {
-      setGameState('loading'); 
-      setError(null);
-      scoreHasBeenSaved.current = false;
-      try {
-        const response = await fetch('/api/getDailyChallenge');
-        if (!response.ok) throw new Error('Failed to fetch daily challenge');
-        const loadedGameData: GameData = await response.json();
-        setGameData(loadedGameData);
-
-        const currentFillInMoments = loadedGameData.moments.filter(m => m.type === 'fill-in') as FillInMoment[] || [];
-        if (currentFillInMoments.length > 0) {
-          setUserInputs(Array(currentFillInMoments.length).fill(''));
-          setLockedStates(Array(currentFillInMoments.length).fill(false));
-          setFeedbackMessages(Array(currentFillInMoments.length).fill(''));
-          setScore(0);
-          debounceTimers.current = Array(currentFillInMoments.length).fill(null);
-          setGameState('playing');
-        } else {
-          throw new Error('No fill-in moments found in the challenge data.');
-        }
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'An unknown error occurred';
-        setError(message);
-        setGameData(null);
-        setGameState('error');
-      } 
-    };
-    fetchGameData();
-    return () => {
-        debounceTimers.current.forEach(timerId => {
-            if (timerId) clearTimeout(timerId);
-        });
-    };
-  }, []);
-
-  const saveScoreAPI = useCallback(async (finalScore: number, correctCount: number, totalQuestions: number) => {
-    if (!gameData || scoreHasBeenSaved.current || isSaving) return;
-    
-    if (!playerName.trim()) {
+    const playedCookie = Cookies.get(COOKIE_NAME);
+    if (playedCookie === 'true' && !adminDate) {
+      setHasPlayedToday(true);
+      setIsLoading(false);
       return;
     }
-    
-    console.log(`Attempting to save score: ${finalScore} for game ${gameData.gameId}`);
-    setIsSaving(true);
-    setSaveError(null);
-    const payload = { 
-        gameId: gameData.gameId, 
-        score: finalScore,
-        playerName: playerName.trim(),
-        correctCount: correctCount,
-        totalQuestions: totalQuestions
-    };
-    try {
-      const response = await fetch('/api/saveScore', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error("Save score failed:", response.status, errorData);
-          throw new Error(errorData.message || `Failed to save score (${response.status})`);
+    setHasPlayedToday(false);
+
+    const fetchChallenge = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const apiUrl = adminDate
+          ? `/api/getDailyChallenge?adminDate=${adminDate}`
+          : '/api/getDailyChallenge'
+
+        const response = await fetch(apiUrl)
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.message || `Failed to fetch challenge (Status: ${response.status})`)
+        }
+        const data: Challenge = await response.json()
+
+        if (data.mode !== 'order') {
+          throw new Error(`Unsupported challenge mode received: ${data.mode}. Only 'order' mode is supported.`)
+        }
+        if (!data.questions) {
+          throw new Error('Challenge data is missing questions.')
+        }
+
+        setChallengeData(data)
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'An unknown error occurred'
+        setError(message)
+        setChallengeData(null)
+      } finally {
+        setIsLoading(false)
       }
-      const result = await response.json();
-      console.log("Save score success:", result);
-      toast.success('Score saved successfully!');
-      scoreHasBeenSaved.current = true;
-      setSaveError(null);
-
-      // Set the cookie after successful save
-      Cookies.set(COOKIE_NAME, 'true', { expires: getExpiryDate() });
-
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to save score';
-      console.error("Save score error:", message);
-      setSaveError(message);
-      toast.error(`Save failed: ${message}`);
-      scoreHasBeenSaved.current = false;
-    } finally {
-      setIsSaving(false);
-    }
-  }, [gameData, isSaving, playerName]);
-
-  const handleInputChange = (index: number, value: string) => {
-    if (lockedStates[index]) return;
-
-    if (debounceTimers.current[index]) {
-        clearTimeout(debounceTimers.current[index] as NodeJS.Timeout);
-        debounceTimers.current[index] = null;
     }
 
-    setUserInputs(prev => {
-      const newInputs = [...prev];
-      newInputs[index] = value;
-      return newInputs;
-    });
+    fetchChallenge()
+  }, [adminDate])
 
-    const moment = fillInMoments[index];
-    const trimmedValue = value.trim();
-    const lowerCaseValue = trimmedValue.toLowerCase();
-    const canonicalAnswer = moment.answer.trim(); // Keep original case for potential future use
-    const lowerCaseCanonicalAnswer = canonicalAnswer.toLowerCase();
-
-    // --- UPDATED: Correctness Check with Variations --- //
-    let isCorrect = false;
-    if (lowerCaseValue === lowerCaseCanonicalAnswer) {
-        isCorrect = true;
-    } else {
-        // Check variations if direct match failed
-        const variations = answerVariations[lowerCaseCanonicalAnswer];
-        if (variations && variations.includes(lowerCaseValue)) {
-            isCorrect = true;
-        }
-    }
-
-    if (isCorrect) {
-        // Lock state, set 'Correct!' feedback, update score
-        setLockedStates(prev => {
-            const newStates = [...prev];
-            newStates[index] = true;
-            return newStates;
-        });
-        setFeedbackMessages(prev => {
-            const newMessages = [...prev];
-            newMessages[index] = 'Correct!'; 
-            return newMessages;
-        });
-        setScore(prevScore => prevScore + (moment.importance || 1));
-        // Clear debounce timer
-        if (debounceTimers.current[index]) {
-             clearTimeout(debounceTimers.current[index] as NodeJS.Timeout);
-             debounceTimers.current[index] = null;
-        }
-    } else {
-        // --- Not Correct: Hint Logic --- //
-        // Reset feedback if it wasn't 'Correct!' and hint doesn't apply
-         if (feedbackMessages[index] !== 'Correct!' && /* hint logic determined no hint */ false ) {
-              setFeedbackMessages(prev => {
-                  const newMessages = [...prev];
-                  newMessages[index] = '';
-                  return newMessages;
-              });
-         }
-         
-         // Start the debounce timer for hints
-         if (trimmedValue.length >= 2 && !debounceTimers.current[index]) { // Only start if not already running
-              debounceTimers.current[index] = setTimeout(() => {
-                let hint = '';
-                // Partial match check
-                if (lowerCaseCanonicalAnswer.includes(lowerCaseValue) && lowerCaseValue.length >= Math.min(4, lowerCaseCanonicalAnswer.length * 0.5)) {
-                    hint = 'Close! Keep going...';
-                } 
-                // Full name check
-                else if (canonicalAnswer.includes(' ') && !trimmedValue.includes(' ') && lowerCaseCanonicalAnswer.endsWith(' ' + lowerCaseValue)) {
-                    hint = 'Need full name?';
-                }
-
-                // Update hint message
-                if (feedbackMessages[index] !== 'Correct!') { // Check again before setting
-                     setFeedbackMessages(prev => {
-                         const newMessages = [...prev];
-                         newMessages[index] = hint;
-                         return newMessages;
-                     });
-                }
-                debounceTimers.current[index] = null; 
-            }, 750); 
-         }
-    }
+  // Function to remove year in parentheses from title
+  const formatTitle = (title: string): string => {
+    return title.replace(/\s*\(\d{4}\)$/, '');
   };
 
-  useEffect(() => {
-    if (gameState === 'playing' && fillInMoments.length > 0 && lockedStates.every(Boolean)) {
-        setGameState('summary');
-    }
-  }, [lockedStates, gameState, fillInMoments, score, saveScoreAPI]);
+  // --- Updated Loading State with Skeletons --- 
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-4 animate-pulse">
+        {/* Skeleton for Game Details Card */}
+        <div className="bg-gray-200 rounded-lg shadow-md p-4 mb-6 text-center h-28">
+          <div className="h-6 bg-gray-300 rounded w-3/4 mx-auto mb-2"></div>
+          <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto mb-1.5"></div>
+          <div className="h-3 bg-gray-300 rounded w-1/3 mx-auto"></div>
+        </div>
 
-  const handleGiveUp = () => {
-    setGameState('summary');
-    debounceTimers.current.forEach(timerId => {
-        if (timerId) clearTimeout(timerId);
-    });
-    debounceTimers.current = [];
-  };
+        {/* Skeleton for Grid */}
+        <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+          {/* Skeleton for Game Component Area */}
+          <div className="lg:col-span-2 bg-gray-200 rounded-lg shadow-md h-64"></div>
+          
+          {/* Skeleton for Scoring Guide Area */}
+          <div className="lg:col-span-1 mt-6 lg:mt-0 bg-gray-200 rounded-lg shadow-md h-64"></div>
+        </div>
+      </div>
+    );
+  }
+  
+  // --- Already Played State --- (remains the same)
+  if (hasPlayedToday) {
+    return (
+      <div className="p-6 text-center text-blue-700 bg-blue-50 rounded-lg shadow-sm border border-blue-200 max-w-md mx-auto">
+        <CheckCircleIcon className="h-10 w-10 mx-auto text-blue-500 mb-3" />
+        <p className="font-semibold mb-1">Already Played Today!</p>
+        <p className="text-sm">You have completed today&apos;s challenge. Come back tomorrow for a new one!</p>
+      </div>
+    )
+  }
 
-  const handlePlayerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPlayerName(e.target.value);
-  };
+  // --- Error State --- (remains the same)
+  if (error) {
+    return (
+      <div className="p-6 text-center text-red-600 bg-red-50 rounded-lg shadow-sm border border-red-200">
+        <XCircleIcon className="h-10 w-10 mx-auto text-red-500 mb-3" />
+        <p className="font-semibold mb-1">Error Loading Challenge</p>
+        <p className="text-sm">{error}</p>
+      </div>
+    )
+  }
 
-  const handleSaveScore = () => {
-    const correctCount = lockedStates.filter(Boolean).length;
-    const totalQuestions = fillInMoments.length;
-    saveScoreAPI(score, correctCount, totalQuestions);
-  };
+  // --- No Data State --- (remains the same)
+  if (!challengeData) {
+    return <div className="p-6 text-center text-gray-500">No challenge data found for the selected date.</div>
+  }
 
-  const goToHome = () => {
-    window.location.href = '/';
-  };
+  // --- Render Actual Content --- (remains the same)
+  return (
+    <div className="max-w-4xl mx-auto p-4">
+       {/* Game Details Card - Updated */}
+      <div className="bg-white rounded-lg shadow-md p-4 mb-6 text-center">
+        {/* Line 1: Title (Largest) - Year removed */}
+        <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-1">{formatTitle(challengeData.title)}</h1>
+        
+        {/* Line 2: Date (Smaller) */}
+        {challengeData.meta?.event_date && (
+            <p className="text-sm text-gray-600">{challengeData.meta.event_date}</p>
+        )}
 
+        {/* Line 3: Venue (Smallest) */}
+        {challengeData.meta?.venue && (
+            <p className="text-xs text-gray-500 mt-0.5">{challengeData.meta.venue}</p>
+        )}
+      </div>
+
+      {/* Grid for Game and Scoring Guide */}
+      <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+        {/* Game Component Area */}
+        <div className="lg:col-span-2">
+          <DailyOrderingGame 
+            key={challengeData.id} // Use challenge ID as key
+            questions={challengeData.questions} 
+            title={challengeData.title} // Pass title to game component IF needed by modal
+          />
+        </div>
+        {/* Scoring Guide Area */}
+        <div className="lg:col-span-1 mt-6 lg:mt-0">
+          <ScoringGuide />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main Page Component using Suspense
+export default function DailyPage() {
   return (
     <TransitionLayout showHeader={false} showFooter={true}>
       <div className="relative">
-        {/* Absolute positioned Home button */}
+        {/* Home Icon */}
         <div className="absolute top-4 left-4 z-20">
-          <Link href="/" className="text-gray-600 hover:text-yellow-500 p-1 rounded-md hover:bg-gray-100" aria-label="Go Home">
-              <HomeIcon className="h-6 w-6" />
+          <Link href="./" className="text-gray-600 hover:text-yellow-500 p-1 rounded-md hover:bg-gray-100" aria-label="Go Home">
+            <HomeIcon className="h-6 w-6" />
           </Link>
         </div>
         
-        {/* Absolute positioned Centered Logo */}
+        {/* Logo - Resized */}
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
-           <Link href="/">
-              <Image 
-                src="/images/applogo.png" 
-                alt="FanFrenzy Home" 
-                width={120} 
-                height={30} // Adjusted height assuming ~4:1 ratio
-                priority 
-                className="h-auto" // Maintain aspect ratio
-              />
+          <Link href="./">
+            <Image 
+              src="/images/applogo.png" 
+              alt="FanFrenzy Home" 
+              width={180}  // Increased width
+              height={45} // Increased height
+              priority 
+              className="h-auto"
+            />
           </Link>
         </div>
 
-        {gameState === 'loading' && (
-          <div className="flex items-center justify-center pt-20">
-            <div className="text-center p-8 text-gray-600">
-              <ArrowPathIcon className="h-12 w-12 mx-auto text-yellow-500 animate-spin mb-4" />
-              Loading Daily Challenge...
-            </div>
-          </div>
-        )}
-
-        {gameState === 'error' && (
-          <div className="flex items-center justify-center pt-20">
-            <div className="text-center p-8 text-red-600 bg-red-50 rounded-lg shadow-sm">
-              <XCircleIcon className="h-12 w-12 mx-auto text-red-500 mb-4" />
-              <p className="font-semibold mb-2">Error Loading Challenge</p>
-              <p className="text-sm">{error || 'Could not load the challenge data. Please try again later.'}</p>
-              <button 
-                onClick={goToHome}
-                className="mt-6 px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 text-sm font-medium"
-              >
-                Go Home
-              </button>
-            </div>
-          </div>
-        )}
-
-        {gameState === 'playing' && gameData && (
-          <div className="max-w-2xl mx-auto p-4 pt-20 space-y-6">
-            <div className="text-center space-y-2">
-              <h1 className="text-2xl font-bold text-gray-800">{gameData.title}</h1>
-              <p className="text-sm text-gray-500">{lockedStates.filter(Boolean).length} of {fillInMoments.length} Moments Answered</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
-              {startMoment && (
-                <div className="pb-4 border-b border-gray-200">
-                  <p className="text-sm text-gray-600 italic">{startMoment.context}</p>
-                </div>
-              )}
-              {fillInMoments.map((moment, index) => (
-                <div key={moment.index} className="space-y-2">
-                  <label htmlFor={`moment-${index}`} className="block text-sm font-medium text-gray-700">
-                    {index + 1}. {moment.prompt}
-                  </label>
-                  <input
-                    id={`moment-${index}`}
-                    type="text"
-                    value={userInputs[index]}
-                    onChange={(e) => handleInputChange(index, e.target.value)}
-                    disabled={lockedStates[index]}
-                    placeholder="Type your answer..."
-                    className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm ${lockedStates[index] ? 'bg-gray-100 text-gray-500' : 'bg-white'}`}
-                  />
-                  <p className={`text-xs min-h-[1rem] ${feedbackMessages[index] === 'Correct!' ? 'text-green-600' : 'text-blue-600'}`}>
-                    {feedbackMessages[index]}
-                  </p>
-                </div>
-              ))}
-              <div className="pt-6 border-t border-gray-200">
-                <button
-                  onClick={handleGiveUp}
-                  className="w-full px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm font-medium"
-                >
-                  Give Up & See Summary
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {gameState === 'summary' && gameData && (
-          <div className="max-w-2xl mx-auto p-4 pt-20">
-            <div className="bg-white rounded-lg shadow-md p-6 text-center space-y-4">
-              <h2 className="text-2xl font-bold text-gray-800">Challenge Complete!</h2>
-              <p className="text-lg">
-                You answered <span className="font-semibold text-green-600">{lockedStates.filter(Boolean).length}</span> out of <span className="font-semibold">{fillInMoments.length}</span> moments correctly.
-              </p>
-              <p className="text-3xl font-bold text-yellow-600">Score: {score}</p>
-              {endMoment && (
-                <p className="text-sm text-gray-600 italic pt-4 border-t border-gray-200">{endMoment.context}</p>
-              )}
-              <div className="pt-4 space-y-3">
-                <input
-                    type="text"
-                    value={playerName}
-                    onChange={handlePlayerNameChange}
-                    placeholder="Enter Your Name to Save Score"
-                    maxLength={20}
-                    className="block w-full max-w-xs mx-auto rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 sm:text-sm"
-                    disabled={scoreHasBeenSaved.current || isSaving}
-                />
-                <button
-                    onClick={handleSaveScore}
-                    disabled={isSaving || scoreHasBeenSaved.current || !playerName.trim()}
-                    className={`w-full max-w-xs mx-auto px-4 py-2 rounded-md text-white font-medium ${!playerName.trim() ? 'bg-gray-300 cursor-not-allowed' : (scoreHasBeenSaved.current ? 'bg-green-500 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-600')}`}
-                >
-                    {isSaving ? 'Saving...' : (scoreHasBeenSaved.current ? 'Score Saved!' : 'Save Score')}
-                </button>
-                {saveError && <p className="text-xs text-red-500">Save failed: {saveError}</p>}
-              </div>
-              <div className="flex justify-center space-x-4 pt-6 border-t border-gray-200">
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium"
-                >
-                  Play Again
-                </button>
-                <button 
-                  onClick={goToHome}
-                  className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 text-sm font-medium"
-                >
-                  Go Home
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {gameState !== 'loading' && gameState !== 'error' && gameState !== 'playing' && gameState !== 'summary' && (
-            <div className="text-center p-8 pt-20 text-gray-500">Invalid game state.</div>
-        )}
+        {/* Main Content Area */}
+        <div className="pt-20">
+          <AdminDateSelector />
+          <Suspense fallback={<div className="flex items-center justify-center p-10 text-gray-600"><ArrowPathIcon className="h-8 w-8 animate-spin mr-2" /> Loading...</div>} >
+            <DailyChallengeContent />
+          </Suspense>
+        </div>
       </div>
     </TransitionLayout>
-  );
-} 
+  )
+}
