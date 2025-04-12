@@ -22,10 +22,9 @@ interface ResultsModalProps {
   score: number;
   maxScore: number;
   title: string; // Challenge title
-  isPerfect: boolean | null;
+  isPerfect?: boolean;
   elapsedTime?: number; // Time in seconds, only if perfect first guess
   guessesTaken?: number; // Number of guesses if perfect (but not first guess)
-  gameId: string; // Add gameId
   onOpenChallengeModal: () => void; // Add handler to open challenge modal
 }
 
@@ -38,7 +37,6 @@ const ResultsModal: React.FC<ResultsModalProps> = ({
   isPerfect,
   elapsedTime,
   guessesTaken,
-  gameId,
   onOpenChallengeModal
 }) => {
 

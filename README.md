@@ -144,6 +144,71 @@ This is a Next.js project bootstrapped with [`create-next-app`](https://github.c
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+### iOS Deployment (via Capacitor)
+
+This project uses [Capacitor](https://capacitorjs.com/) to package the Next.js web application as a native iOS app.
+
+**Prerequisites:**
+
+*   Xcode installed
+*   CocoaPods installed (`sudo gem install cocoapods`)
+
+**Setup:**
+
+1.  **Install Capacitor CLI:**
+    ```bash
+    npm install @capacitor/cli --save-dev
+    ```
+2.  **Install Core and iOS packages:**
+    ```bash
+    npm install @capacitor/core @capacitor/ios
+    ```
+3.  **Initialize Capacitor:** (This might have been done already)
+    ```bash
+    npx cap init "FanFrenzy" "app.fanfrenzy.challenge" --web-dir=out
+    ```
+    *Note: Adjust the app name and ID if needed. `web-dir` points to the output of `next export` or `next build` if configured for static output.*
+4.  **Configure Capacitor:**
+    *   Edit `capacitor.config.ts` (or `.json`). Ensure the `server.url` points to your deployed web app if you are loading it live, or configure `webDir` correctly for a static build. For live loading (as configured previously):
+        ```typescript
+        import { CapacitorConfig } from '@capacitor/cli';
+
+        const config: CapacitorConfig = {
+          appId: 'app.fanfrenzy.challenge',
+          appName: 'FanFrenzy',
+          webDir: 'out', // Or your build output directory
+          bundledWebRuntime: false, // Important for loading remote URL
+          server: {
+            url: 'https://fanfrenzy.app', // Your deployed web app URL
+            cleartext: true // Allow HTTP if necessary, though HTTPS is recommended
+          }
+        };
+
+        export default config;
+        ```
+5.  **Add iOS Platform:**
+    ```bash
+    npx cap add ios
+    ```
+6.  **Sync Web Assets & Native Project:**
+    ```bash
+    npm run build # Ensure your web build is up-to-date
+    npx cap sync ios
+    ```
+7.  **Open in Xcode:**
+    ```bash
+    npx cap open ios
+    ```
+8.  **Xcode Configuration:**
+    *   Select your development team under "Signing & Capabilities".
+    *   Ensure the correct device/simulator is selected.
+    *   Build and run the app (Cmd+R).
+
+**Notes:**
+
+*   The `.gitignore` file has been updated to exclude generated iOS directories (`/ios/App/Pods`, `DerivedData`, etc.).
+*   Viewport and CSS adjustments were made to accommodate the iPhone's Dynamic Island safe areas.
+
 ### Homepage
 
 The homepage (`/`) serves as the main entry point:

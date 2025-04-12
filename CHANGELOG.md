@@ -91,6 +91,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added links to transition demo from homepage and team theme page.
 - Updated README with transition system documentation.
 - Added multi-format Daily Challenge support with 30-day static dataset.
+- Added `ResultsModal` component (`src/components/ResultsModal.tsx`) using Headless UI to display scores after game completion.
+- Implemented social sharing functionality (Twitter, Facebook) within the `ResultsModal`.
+- Integrated `ResultsModal` into the Daily Challenge summary screen.
+- Installed Capacitor dependencies (`@capacitor/cli`, `@capacitor/core`, `@capacitor/ios`).
+- Initialized Capacitor for the project (`npx cap init`).
+- Added iOS platform (`npx cap add ios`).
+- Configured `capacitor.config.ts` to load the deployed web app (`https://fanfrenzy.app`).
+- Added iOS/Capacitor specific entries to `.gitignore`.
 
 ### Changed
 - Refactored homepage (/) to use new immersive dashboard design.
@@ -116,6 +124,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Restored immediate interactive feedback (locking inputs) to Daily Challenge.
 - Removed dark mode toggle and related styling.
 - Removed old `/play` page in favor of dynamic `/daily` page.
+- Updated viewport meta tag (`viewport-fit=cover`) and global CSS (`padding-top: env(safe-area-inset-top)`) to accommodate iOS safe areas (Dynamic Island).
 
 ### Fixed
 - Resolved minor styling issues in Navbar.
@@ -126,6 +135,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resolved build errors related to `@next/font`.
 - Resolved build error related to missing ThemeToggle component.
 - Corrected sticky footer implementation.
+- Removed unnecessary `as={Fragment}` from `Transition.Child` in `ResultsModal` to fix transition prop warning.
+- Addressed Capacitor/CocoaPods installation issues.
 
 ### Security
 
