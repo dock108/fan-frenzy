@@ -1,10 +1,12 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react'
 import { useAuth } from '@/context/AuthContext' // If needed for saving scores later
-import toast from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
+import ChallengeModal from '@/components/ChallengeModal'
+import MomentCard from '@/components/MomentCard'
 
 // Define expected data structures (should match API response)
 interface MomentBase { index: number; type: 'start' | 'mc' | 'end'; }
@@ -22,321 +24,339 @@ type Moment = StartEndMoment | MultipleChoiceMoment;
 interface GameData {
     event_data: any;
     key_moments: Moment[];
+    game_id: string;
 }
 
-// --- Component --- //
-export default function RewindPlayPage() {
-  const searchParams = useSearchParams()
-  const { user } = useAuth(); // Get user for potential score saving
+// Interfaces (ensure consistency or import shared types)
+interface ScorePayload { /* ... */ }
 
-  // Game Parameters
-  const team = searchParams.get('team')
-  const year = searchParams.get('year')
-  const gameId = searchParams.get('gameId')
+// --- Main Content Component --- //
+function RewindPlayContent() {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const { user } = useAuth()
 
-  // Fetching State
-  const [gameData, setGameData] = useState<GameData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+    // Game Parameters
+    const team = searchParams.get('team')
+    const year = searchParams.get('year')
+    const gameId = searchParams.get('gameId')
 
-  // Gameplay State
-  const [currentMomentIndex, setCurrentMomentIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [isRevealed, setIsRevealed] = useState(false);
-  const [score, setScore] = useState(0);
-  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-  const [skippedMoments, setSkippedMoments] = useState<number[]>([]); // Store indices of skipped moments
-  const [missedHighImportance, setMissedHighImportance] = useState<MultipleChoiceMoment[]>([]);
+    // Fetching State
+    const [gameData, setGameData] = useState<GameData | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
-  // Add state for score saving
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const scoreHasBeenSaved = useRef(false);
+    // Gameplay State
+    const [currentMomentIndex, setCurrentMomentIndex] = useState(0)
+    const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
+    const [isRevealed, setIsRevealed] = useState(false)
+    const [score, setScore] = useState(0)
+    const [correctAnswersCount, setCorrectAnswersCount] = useState(0)
+    const [isFinished, setIsFinished] = useState(false)
+    const [skippedMoments, setSkippedMoments] = useState<number[]>([])
+    const [missedHighImportance, setMissedHighImportance] = useState<MultipleChoiceMoment[]>([])
 
-  // Fetch Game Data
-  useEffect(() => {
-      if (!team || !year || !gameId) {
-          setError('Missing team, year, or game information in URL.');
-          setIsLoading(false);
-          return;
-      }
-      const fetchGame = async () => {
-          setIsLoading(true);
-          setError(null);
-          scoreHasBeenSaved.current = false; // Reset save flag
-          setCurrentMomentIndex(0);
-          setSelectedAnswer(null);
-          setIsRevealed(false);
-          setScore(0);
-          setCorrectAnswersCount(0);
-          setIsFinished(false);
-          setSkippedMoments([]);
-          setMissedHighImportance([]);
-          setIsSaving(false); // Reset saving state
-          setSaveError(null);
+    // Add state for score saving
+    const [isSaving, setIsSaving] = useState(false)
+    const [saveError, setSaveError] = useState<string | null>(null)
+    const scoreHasBeenSaved = useRef(false)
 
-          try {
-              const response = await fetch(`/api/fetchGame?team=${team}&year=${year}&gameId=${gameId}`);
-              const data = await response.json();
-              if (!response.ok) {
-                  throw new Error(data.message || `HTTP error! Status: ${response.status}`);
-              }
-              // Basic validation of the fetched data format
-              if (!data || !Array.isArray(data.key_moments) || data.key_moments.length === 0 || data.key_moments[0].type !== 'mc'){
-                   throw new Error('Invalid game data format received from API. Expected multiple-choice moments.');
-              }
-              setGameData(data as GameData);
-          } catch (err: any) {
-              console.error("Failed to fetch game data:", err);
-              setError(err.message || 'An unknown error occurred.');
-              setGameData(null);
-          } finally {
-              setIsLoading(false);
-          }
-      };
+    // Add new state for Challenge Modal
+    const [isChallengeModalOpen, setIsChallengeModalOpen] = useState<boolean>(false)
+    const [momentToChallenge, setMomentToChallenge] = useState<MultipleChoiceMoment | null>(null)
 
-      fetchGame();
+    // Fetch Game Data
+    useEffect(() => {
+        if (!team || !year || !gameId) {
+            setError('Missing team, year, or game information in URL.');
+            setIsLoading(false);
+            return;
+        }
+        const fetchGame = async () => {
+            setIsLoading(true);
+            setError(null);
+            scoreHasBeenSaved.current = false; // Reset save flag
+            setCurrentMomentIndex(0);
+            setSelectedAnswer(null);
+            setIsRevealed(false);
+            setScore(0);
+            setCorrectAnswersCount(0);
+            setIsFinished(false);
+            setSkippedMoments([]);
+            setMissedHighImportance([]);
+            setIsSaving(false); // Reset saving state
+            setSaveError(null);
 
-  }, [team, year, gameId]); // Re-fetch if params change
+            try {
+                const response = await fetch(`/api/fetchGame?team=${team}&year=${year}&gameId=${gameId}`);
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || `HTTP error! Status: ${response.status}`);
+                }
+                // Basic validation of the fetched data format
+                if (!data || !Array.isArray(data.key_moments) || data.key_moments.length === 0 || data.key_moments[0].type !== 'mc'){
+                     throw new Error('Invalid game data format received from API. Expected multiple-choice moments.');
+                }
+                setGameData(data as GameData);
+            } catch (err: any) {
+                console.error("Failed to fetch game data:", err);
+                setError(err.message || 'An unknown error occurred.');
+                setGameData(null);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-  const mcMoments = gameData?.key_moments.filter(m => m.type === 'mc') as MultipleChoiceMoment[] || [];
-  const currentMoment = mcMoments[currentMomentIndex];
+        fetchGame();
 
-  // --- Function to call the saveRewindScore API --- //
-  const saveRewindScoreAPI = useCallback(async () => {
-    if (!user || !gameId || !gameData || scoreHasBeenSaved.current || isSaving || !isFinished) return;
+    }, [team, year, gameId]); // Re-fetch if params change
 
-    setIsSaving(true);
-    setSaveError(null);
-    scoreHasBeenSaved.current = true;
+    const mcMoments = gameData?.key_moments.filter(m => m.type === 'mc') as MultipleChoiceMoment[] || [];
+    const currentMoment = mcMoments[currentMomentIndex];
 
-    const payload = {
-        gameId: gameId,
-        score: score,
-        totalMoments: mcMoments.length,
-        skipped: skippedMoments.length,
-        correct: correctAnswersCount
+    // --- Function to call the saveRewindScore API --- //
+    const saveRewindScoreAPI = useCallback(async () => {
+        if (!user || !gameId || !gameData || scoreHasBeenSaved.current || isSaving || !isFinished) return;
+
+        setIsSaving(true);
+        setSaveError(null);
+        scoreHasBeenSaved.current = true;
+
+        const payload = {
+            gameId: gameId,
+            score: score,
+            totalMoments: mcMoments.length,
+            skipped: skippedMoments.length,
+            correct: correctAnswersCount
+        };
+
+        try {
+            const response = await fetch('/api/saveRewindScore', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || `API Error: ${response.status}`);
+
+            toast.success('Rewind score saved!');
+        } catch (err: any) {
+            console.error("Error saving rewind score via API:", err);
+            setSaveError(err.message || 'Failed to save rewind score.');
+            toast.error(`Save failed: ${err.message}`);
+            scoreHasBeenSaved.current = false; // Allow retry
+        } finally {
+            setIsSaving(false);
+        }
+    }, [user, gameId, score, mcMoments.length, skippedMoments.length, correctAnswersCount, isSaving, isFinished, gameData]);
+
+    // --- Trigger Save on Finish --- //
+    useEffect(() => {
+        if (isFinished && user && !scoreHasBeenSaved.current && !isSaving) {
+            saveRewindScoreAPI();
+        }
+    }, [isFinished, user, isSaving, saveRewindScoreAPI]);
+
+    // --- Event Handlers --- //
+    const handleSelectAnswer = (index: number) => {
+        if (!isRevealed) {
+            setSelectedAnswer(index);
+        }
     };
 
-    try {
-      const response = await fetch('/api/saveRewindScore', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+    const handleReveal = () => {
+        if (selectedAnswer === null || !currentMoment) return;
+        setIsRevealed(true);
+        if (selectedAnswer === currentMoment.answer) {
+            setScore(prev => prev + Math.round(currentMoment.importance * 10));
+            setCorrectAnswersCount(prev => prev + 1);
+        } else {
+            if (currentMoment.importance >= 8.5) {
+                setMissedHighImportance(prev => [...prev, currentMoment]);
+            }
+        }
+    };
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || `API Error: ${response.status}`);
+    const handleSkip = () => {
+        if (!currentMoment) return;
+        // Award partial score for skipping (e.g., 1 point or small fraction of importance)
+        setScore(prev => prev + 1); // Example: 1 point for skipping
+        setSkippedMoments(prev => [...prev, currentMoment.index]);
+        gotoNextMoment();
+    };
 
-      toast.success('Rewind score saved!');
-    } catch (err: any) {
-      console.error("Error saving rewind score via API:", err);
-      setSaveError(err.message || 'Failed to save rewind score.');
-      toast.error(`Save failed: ${err.message}`);
-      scoreHasBeenSaved.current = false; // Allow retry
-    } finally {
-      setIsSaving(false);
+    const handleNext = () => {
+        gotoNextMoment();
     }
-  }, [user, gameId, score, mcMoments.length, skippedMoments.length, correctAnswersCount, isSaving, isFinished, gameData]);
 
-  // --- Trigger Save on Finish --- //
-  useEffect(() => {
-    if (isFinished && user && !scoreHasBeenSaved.current && !isSaving) {
-      saveRewindScoreAPI();
+    const gotoNextMoment = () => {
+        setSelectedAnswer(null);
+        setIsRevealed(false);
+        if (currentMomentIndex < mcMoments.length - 1) {
+            setCurrentMomentIndex(prev => prev + 1);
+        } else {
+            setIsFinished(true);
+            // Score saving is now handled by useEffect watching isFinished
+        }
     }
-  }, [isFinished, user, isSaving, saveRewindScoreAPI]);
 
-  // --- Event Handlers --- //
-  const handleSelectAnswer = (index: number) => {
-    if (!isRevealed) {
-      setSelectedAnswer(index);
+    // --- Render Logic --- //
+
+    if (isLoading) {
+        return <div className="container mx-auto p-4 text-center">Loading game: {gameId}...</div>;
     }
-  };
 
-  const handleReveal = () => {
-    if (selectedAnswer === null || !currentMoment) return;
-    setIsRevealed(true);
-    if (selectedAnswer === currentMoment.answer) {
-      setScore(prev => prev + Math.round(currentMoment.importance * 10));
-      setCorrectAnswersCount(prev => prev + 1);
-    } else {
-      if (currentMoment.importance >= 8.5) {
-        setMissedHighImportance(prev => [...prev, currentMoment]);
-      }
-    }
-  };
-
-  const handleSkip = () => {
-    if (!currentMoment) return;
-    // Award partial score for skipping (e.g., 1 point or small fraction of importance)
-    setScore(prev => prev + 1); // Example: 1 point for skipping
-    setSkippedMoments(prev => [...prev, currentMoment.index]);
-    gotoNextMoment();
-  };
-
-  const handleNext = () => {
-     gotoNextMoment();
-  }
-
-  const gotoNextMoment = () => {
-      setSelectedAnswer(null);
-      setIsRevealed(false);
-      if (currentMomentIndex < mcMoments.length - 1) {
-          setCurrentMomentIndex(prev => prev + 1);
-      } else {
-          setIsFinished(true);
-          // Score saving is now handled by useEffect watching isFinished
-      }
-  }
-
-  // --- Render Logic --- //
-
-  if (isLoading) {
-    return <div className="container mx-auto p-4 text-center">Loading game: {gameId}...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto p-4 text-center">
-        <p className="text-red-600">Error: {error}</p>
-        <Link href="/rewind" className="text-indigo-600 hover:underline mt-4 block">Go back to selection</Link>
-      </div>
-    );
-  }
-
-  if (!gameData || !currentMoment && !isFinished) {
-    return <div className="container mx-auto p-4 text-center">Game data unavailable or invalid.</div>;
-  }
-
-  // --- Render Game --- //
-  if (!isFinished && currentMoment) {
-      const isCorrect = selectedAnswer === currentMoment.answer;
-    return (
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-2 text-center">Team Rewind: {gameData.event_data?.summary || gameId}</h1>
-        <p className="text-center text-gray-600 mb-6">Moment {currentMomentIndex + 1} of {mcMoments.length}</p>
-
-        <div className="bg-white p-6 md:p-8 rounded-lg shadow-md border border-gray-200 max-w-2xl mx-auto">
-          {/* Moment Card Content */}
-          <p className="text-lg text-gray-700 mb-4 italic">{currentMoment.context}</p>
-          <h2 className="text-xl font-semibold mb-5">{currentMoment.question}</h2>
-
-          <div className="space-y-3 mb-6">
-            {currentMoment.options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleSelectAnswer(index)}
-                disabled={isRevealed}
-                className={`block w-full text-left p-3 rounded border transition-colors duration-200 
-                  ${isRevealed
-                    ? (index === currentMoment.answer ? 'bg-green-100 border-green-300 text-green-800' : 'bg-gray-100 border-gray-300 text-gray-500')
-                    : (selectedAnswer === index ? 'bg-indigo-100 border-indigo-400' : 'bg-white border-gray-300 hover:bg-gray-50')
-                  }
-                  ${!isRevealed ? 'cursor-pointer' : 'cursor-default'}
-                `}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-
-          {/* Action Buttons */} 
-          <div className="flex flex-col sm:flex-row gap-3">
-              {!isRevealed ? (
-                  <>
-                      <button
-                          onClick={handleReveal}
-                          disabled={selectedAnswer === null}
-                          className="flex-1 px-6 py-3 rounded-md text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-300"
-                      >
-                          Reveal Answer
-                      </button>
-                      <button
-                          onClick={handleSkip}
-                          className="flex-1 px-6 py-3 rounded-md text-lg font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition duration-300"
-                      >
-                          Skip Moment (+1 pt)
-                      </button>
-                  </>
-              ) : (
-                  <button
-                      onClick={handleNext}
-                      className="w-full px-6 py-3 rounded-md text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300"
-                      >
-                      {currentMomentIndex < mcMoments.length - 1 ? 'Next Moment' : 'Finish Challenge'}
-                  </button>
-              )}
+    if (error) {
+        return (
+            <div className="container mx-auto p-4 text-center">
+                <p className="text-red-600">Error: {error}</p>
+                <Link href="/rewind" className="text-indigo-600 hover:underline mt-4 block">Go back to selection</Link>
             </div>
+        );
+    }
 
-            {/* Reveal Panel */} 
-            {isRevealed && (
-              <div className={`mt-6 p-4 rounded border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                  <p className={`font-semibold text-lg mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                      {isCorrect ? 'Correct!' : 'Incorrect.'}
-                  </p>
-                  <p className="text-gray-800 mb-2">{currentMoment.explanation}</p>
-                  <p className="text-sm text-gray-600">Importance Score: <span className="font-medium">{currentMoment.importance}/10</span></p>
-              </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+    if (!gameData || !currentMoment && !isFinished) {
+        return <div className="container mx-auto p-4 text-center">Game data unavailable or invalid.</div>;
+    }
 
-  // --- Render Summary Screen --- //
-  if (isFinished) {
-      const finalScore = score;
-      const momentsAttempted = mcMoments.length - skippedMoments.length;
+    // --- Render Game --- //
+    if (!isFinished && currentMoment) {
+        const isCorrect = selectedAnswer === currentMoment.answer;
+        return (
+            <div className="container mx-auto p-4">
+                <h1 className="text-2xl font-bold mb-2 text-center">Team Rewind: {gameData.event_data?.summary || gameId}</h1>
+                <p className="text-center text-gray-600 mb-6">Moment {currentMomentIndex + 1} of {mcMoments.length}</p>
+
+                <div className="bg-white p-6 md:p-8 rounded-lg shadow-md border border-gray-200 max-w-2xl mx-auto">
+                    {/* Moment Card Content */}
+                    <p className="text-lg text-gray-700 mb-4 italic">{currentMoment.context}</p>
+                    <h2 className="text-xl font-semibold mb-5">{currentMoment.question}</h2>
+
+                    <div className="space-y-3 mb-6">
+                        {currentMoment.options.map((option, index) => (
+                            <button
+                                key={index}
+                                onClick={() => handleSelectAnswer(index)}
+                                disabled={isRevealed}
+                                className={`block w-full text-left p-3 rounded border transition-colors duration-200 
+                                    ${isRevealed
+                                        ? (index === currentMoment.answer ? 'bg-green-100 border-green-300 text-green-800' : 'bg-gray-100 border-gray-300 text-gray-500')
+                                        : (selectedAnswer === index ? 'bg-indigo-100 border-indigo-400' : 'bg-white border-gray-300 hover:bg-gray-50')
+                                    }
+                                    ${!isRevealed ? 'cursor-pointer' : 'cursor-default'}
+                                `}
+                            >
+                                {option}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Action Buttons */} 
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        {!isRevealed ? (
+                            <>
+                                <button
+                                    onClick={handleReveal}
+                                    disabled={selectedAnswer === null}
+                                    className="flex-1 px-6 py-3 rounded-md text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-300"
+                                >
+                                    Reveal Answer
+                                </button>
+                                <button
+                                    onClick={handleSkip}
+                                    className="flex-1 px-6 py-3 rounded-md text-lg font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition duration-300"
+                                >
+                                    Skip Moment (+1 pt)
+                                </button>
+                            </>
+                        ) : (
+                            <button
+                                onClick={handleNext}
+                                className="w-full px-6 py-3 rounded-md text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300"
+                            >
+                                {currentMomentIndex < mcMoments.length - 1 ? 'Next Moment' : 'Finish Challenge'}
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Reveal Panel */} 
+                    {isRevealed && (
+                        <div className={`mt-6 p-4 rounded border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                            <p className={`font-semibold text-lg mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                                {isCorrect ? 'Correct!' : 'Incorrect.'}
+                            </p>
+                            <p className="text-gray-800 mb-2">{currentMoment.explanation}</p>
+                            <p className="text-sm text-gray-600">Importance Score: <span className="font-medium">{currentMoment.importance}/10</span></p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // --- Render Summary Screen --- //
+    if (isFinished) {
+        const finalScore = score;
+        const momentsAttempted = mcMoments.length - skippedMoments.length;
+        return (
+            <div className="container mx-auto p-4">
+                <h1 className="text-3xl font-bold mb-6 text-center">Team Rewind Complete!</h1>
+                <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200 max-w-xl mx-auto text-center">
+                    <h2 className="text-2xl font-semibold mb-4">Your Results for {gameData?.event_data?.summary || gameId}</h2>
+                    <p className="text-4xl font-bold text-indigo-600 mb-4">{finalScore}</p>
+                    <p className="text-lg text-gray-700">You answered {correctAnswersCount} out of {momentsAttempted} moments correctly.</p>
+                    <p className="text-lg text-gray-700 mb-6">You skipped {skippedMoments.length} moment(s).</p>
+
+                    {missedHighImportance.length > 0 && (
+                        <div className="mt-6 border-t pt-4 text-left">
+                            <h3 className="text-xl font-semibold mb-3 text-red-600 text-center">Key Moments Missed (Importance >= 8.5):</h3>
+                            <ul className="list-disc list-inside space-y-2 text-gray-700">
+                                {missedHighImportance.map(moment => (
+                                    <li key={moment.index}>
+                                        <span className="font-medium">Moment {moment.index + 1}:</span> {moment.question} (Importance: {moment.importance})
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* Save Status Indicator */}
+                    {user && (
+                        <div className="mt-4 h-6"> {/* Added fixed height to prevent layout shift */} 
+                            {isSaving && <p className="text-blue-600 text-sm">Saving score...</p>}
+                            {saveError && <p className="text-red-600 text-sm">Save failed: {saveError}</p>}
+                            {!isSaving && scoreHasBeenSaved.current && !saveError && <p className="text-green-600 text-sm">Your score has been saved.</p>}
+                            {!isSaving && !scoreHasBeenSaved.current && saveError && (
+                                <button
+                                    onClick={saveRewindScoreAPI} // Allow retry
+                                    className="text-sm text-indigo-600 hover:underline"
+                                >
+                                    Retry Save?
+                                </button>
+                            )}
+                        </div>
+                    )}
+                    {!user && (
+                        <p className="text-gray-500 text-sm mt-4">Log in to save your Rewind scores!</p>
+                    )}
+
+                    <Link href="/rewind" className="mt-8 inline-block px-6 py-3 rounded-md text-lg font-semibold text-white bg-gray-600 hover:bg-gray-700 transition duration-300">
+                        Select Another Game
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    return null; // Should not be reached
+}
+
+// --- Default Export with Suspense --- //
+export default function RewindPlayPage() {
+    // This is the actual default export for the page
     return (
-      <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-6 text-center">Team Rewind Complete!</h1>
-        <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200 max-w-xl mx-auto text-center">
-          <h2 className="text-2xl font-semibold mb-4">Your Results for {gameData?.event_data?.summary || gameId}</h2>
-          <p className="text-4xl font-bold text-indigo-600 mb-4">{finalScore}</p>
-          <p className="text-lg text-gray-700">You answered {correctAnswersCount} out of {momentsAttempted} moments correctly.</p>
-          <p className="text-lg text-gray-700 mb-6">You skipped {skippedMoments.length} moment(s).</p>
-
-          {missedHighImportance.length > 0 && (
-             <div className="mt-6 border-t pt-4 text-left">
-              <h3 className="text-xl font-semibold mb-3 text-red-600 text-center">Key Moments Missed (Importance >= 8.5):</h3>
-               <ul className="list-disc list-inside space-y-2 text-gray-700">
-                {missedHighImportance.map(moment => (
-                   <li key={moment.index}>
-                    <span className="font-medium">Moment {moment.index + 1}:</span> {moment.question} (Importance: {moment.importance})
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Save Status Indicator */}
-          {user && (
-            <div className="mt-4 h-6"> {/* Added fixed height to prevent layout shift */} 
-                {isSaving && <p className="text-blue-600 text-sm">Saving score...</p>}
-                {saveError && <p className="text-red-600 text-sm">Save failed: {saveError}</p>}
-                {!isSaving && scoreHasBeenSaved.current && !saveError && <p className="text-green-600 text-sm">Your score has been saved.</p>}
-                {!isSaving && !scoreHasBeenSaved.current && saveError && (
-                     <button
-                        onClick={saveRewindScoreAPI} // Allow retry
-                        className="text-sm text-indigo-600 hover:underline"
-                    >
-                        Retry Save?
-                    </button>
-                )}
-            </div>
-          )}
-          {!user && (
-            <p className="text-gray-500 text-sm mt-4">Log in to save your Rewind scores!</p>
-          )}
-
-          <Link href="/rewind" className="mt-8 inline-block px-6 py-3 rounded-md text-lg font-semibold text-white bg-gray-600 hover:bg-gray-700 transition duration-300">
-            Select Another Game
-          </Link>
-        </div>
-      </div>
+        <Suspense fallback={<div className="container mx-auto p-4 text-center">Loading Game Parameters...</div>}>\n            <RewindPlayContent />
+        </Suspense>
     );
-  }
-
-  return null; // Should not be reached
 } 

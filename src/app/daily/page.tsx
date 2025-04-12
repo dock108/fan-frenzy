@@ -4,11 +4,14 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '@/context/AuthContext'
 // import dailyChallengeData from '@/data/daily-challenge.json' // Removed direct import
 import { supabase } from '@/utils/supabase'
-import toast from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
+import Link from 'next/link'
+import ChallengeModal from '@/components/ChallengeModal'
+import MomentCard from '@/components/MomentCard'
 
 interface MomentBase {
   index: number;
-  type: 'start' | 'fill-in' | 'end';
+  type: 'start' | 'fill-in' | 'end' | 'mc';
 }
 
 interface StartEndMoment extends MomentBase {
@@ -23,12 +26,29 @@ interface FillInMoment extends MomentBase {
   importance: number;
 }
 
-type Moment = StartEndMoment | FillInMoment;
+interface MultipleChoiceMoment extends MomentBase {
+  type: 'mc';
+  context: string;
+  question: string;
+  options: string[];
+  answer: number;
+  explanation?: string;
+  importance?: number;
+}
+
+type Moment = StartEndMoment | FillInMoment | MultipleChoiceMoment;
 
 interface GameData {
   gameId: string;
   title: string;
   moments: Moment[];
+}
+
+interface ScorePayload {
+  gameId: string;
+  score: number;
+  answers: { momentIndex: number; selectedOption: number | null; isCorrect: boolean | null }[];
+  skipped: number;
 }
 
 const DEBOUNCE_DELAY = 1500; // ms
@@ -47,11 +67,16 @@ export default function DailyChallengePage() {
   const [isSaving, setIsSaving] = useState(false); // State for saving process
   const [saveError, setSaveError] = useState<string | null>(null); // State for save errors
   const scoreHasBeenSaved = useRef(false); // Prevent duplicate saves
+  const [isChallengeModalOpen, setIsChallengeModalOpen] = useState<boolean>(false);
+  const [momentToChallengeIndex, setMomentToChallengeIndex] = useState<number | null>(null);
+  const [currentMomentDisplayIndex, setCurrentMomentDisplayIndex] = useState<number>(0); // 0-based index for array access
+  const [userAnswers, setUserAnswers] = useState<(number | null)[]>([]);
 
   // Derived states need careful handling due to async data loading
   const fillInMoments = gameData?.moments.filter(m => m.type === 'fill-in') as FillInMoment[] || [];
   const startMoment = gameData?.moments.find(m => m.type === 'start') as StartEndMoment | undefined;
   const endMoment = gameData?.moments.find(m => m.type === 'end') as StartEndMoment | undefined;
+  const multipleChoiceMoments = gameData?.moments.filter(m => m.type === 'mc') as MultipleChoiceMoment[] || [];
 
   // Fetch data and initialize state
   useEffect(() => {
@@ -81,6 +106,7 @@ export default function DailyChallengePage() {
           setFeedbackMessages([]);
           debounceTimers.current = [];
         }
+        setUserAnswers(Array(loadedGameData.moments.length).fill(null));
       } catch (err: any) {
         console.error("Failed to fetch daily challenge:", err);
         setError(err.message || 'An unknown error occurred while fetching the challenge.');
@@ -253,6 +279,7 @@ export default function DailyChallengePage() {
   if (!isFinished) {
     return (
       <div className="container mx-auto p-4">
+        <Toaster position="top-center" />
         <h1 className="text-2xl font-bold mb-4 text-center">{gameData.title}</h1>
         <p className="text-center text-gray-600 mb-6">Fill in the key moments. Correct answers lock automatically!</p>
 
@@ -367,5 +394,88 @@ export default function DailyChallengePage() {
     )
   }
 
-  return null;
+  return (
+    <div className="container mx-auto p-4 max-w-2xl">
+      <Toaster position="top-center" />
+      <h1 className="text-3xl font-bold mb-4 text-center">Daily Challenge</h1>
+      <p className="text-center text-gray-600 mb-2">(Game: {gameData.title})</p>
+      <p className="text-center text-gray-500 mb-6">Moment {currentMomentDisplayIndex + 1} of {gameData.moments.length}</p>
+
+      {!isFinished ? (
+        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+          <p className="text-gray-700 mb-4 italic">{gameData.moments[currentMomentDisplayIndex as number].context}</p>
+          <h2 className="text-xl font-semibold mb-4">{gameData.moments[currentMomentDisplayIndex as number].prompt}</h2>
+          <div className="space-y-3 mb-6">
+            {gameData.moments[currentMomentDisplayIndex as number].options.map((option, index) => (
+              <button
+                key={index}
+                onClick={() => handleInputChange(currentMomentDisplayIndex as number, option)}
+                className="block w-full text-left p-3 rounded border border-gray-300 bg-white hover:bg-gray-100 transition duration-150"
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => handleInputChange(currentMomentDisplayIndex as number, '')}
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              Skip Question
+            </button>
+            <button
+              onClick={() => openChallengeModal(gameData.moments[currentMomentDisplayIndex as number] as MultipleChoiceMoment)}
+              className="text-xs text-red-500 hover:text-red-700 border border-red-300 px-2 py-1 rounded hover:bg-red-50 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!user}
+              title={user ? "Challenge this moment" : "Log in to challenge moments"}
+            >
+              Challenge Moment
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-green-50 p-6 rounded-lg shadow-md border border-green-200 text-center">
+          <h2 className="text-2xl font-bold mb-4 text-green-800">Challenge Complete!</h2>
+          <p className="text-xl mb-4">Your Score: {score} / {gameData.moments.length}</p>
+          <div className="mb-4 text-sm">
+            {userInputs.map((answer, index) => {
+              const moment = gameData.moments[index];
+              const isCorrect = answer !== null && answer === moment.answer;
+              const skipped = answer === null;
+              return (
+                <div key={index} className={`p-2 my-1 rounded ${skipped ? 'bg-gray-200' : isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
+                  <p className="font-semibold">Moment {index + 1}: {skipped ? 'Skipped' : isCorrect ? 'Correct' : 'Incorrect'}</p>
+                  {!skipped && !isCorrect && <p className="text-xs">Your answer: {moment.options[answer!]}, Correct: {moment.options[moment.answer]}</p>}
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-3 text-sm">
+            {!user && <p className="text-gray-600">(Log in to save your score)</p>}
+            {user && isSaving && <p className="text-blue-600 animate-pulse">Saving score...</p>}
+            {user && <p className="text-green-600 font-semibold">Score saved successfully!</p>}
+            {user && <p className="text-red-600">Could not save score. {saveError ? `(${saveError})` : 'Please try again later.'}</p>}
+          </div>
+          <Link href="/" className="mt-6 inline-block px-6 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">
+            Back to Home
+          </Link>
+        </div>
+      )}
+
+      {currentMomentDisplayIndex !== null && gameData && (
+        <ChallengeModal
+          isOpen={isChallengeModalOpen}
+          onClose={() => {
+            setIsChallengeModalOpen(false);
+            setMomentToChallengeIndex(null);
+          }}
+          gameId={gameData.gameId}
+          momentIndex={currentMomentDisplayIndex}
+          onSubmitSuccess={() => {
+            toast.success("Thanks! Your feedback will help improve future versions.");
+          }}
+        />
+      )}
+    </div>
+  );
 } 

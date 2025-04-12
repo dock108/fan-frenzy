@@ -1,6 +1,87 @@
-# SpoilSports
+# FanFrenzy
+
+A Next.js application to test your memory of legendary sports moments.
+
+Built with Next.js, Supabase, Tailwind CSS, and OpenAI.
 
 This is a Next.js project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+## Core Features
+
+*   **Multiple Game Modes:** Daily Challenge, Team Rewind, Shuffle Mode.
+*   **AI-Powered Content:** Leverages OpenAI (GPT-4o) to generate key moments and multiple-choice questions for games.
+*   **Supabase Integration:** Uses Supabase for PostgreSQL database, user authentication, and secure data storage.
+*   **Interactive Gameplay:** Features include multiple-choice questions and drag-and-drop moment ordering.
+*   **Score Tracking:** Saves user scores for Daily Challenge, Team Rewind, and Shuffle Mode.
+*   **Leaderboards:** Displays top scores for each game mode on the `/leaderboard` page.
+*   **Reusable Components:** Uses a modular `MomentCard` component to display moments consistently across game modes.
+*   **Challenge Feature:** Allows users to submit feedback on specific AI-generated moments to help improve the model.
+
+## Gameplay Modes
+
+### Daily Challenge
+*   Fetches a unique game based on the current date.
+*   Presents key moments using the `MomentCard` component.
+*   Scores are saved to the user's profile.
+*   Includes a "Challenge This Moment" button for feedback.
+
+### Team Rewind
+*   Users select a team, year, and specific game.
+*   Key moments are fetched and presented using the `MomentCard` component.
+*   Scores are saved to the user's profile.
+*   Includes a "Challenge This Moment" button for feedback.
+
+### Shuffle Mode
+*   Fetches key moments from a predefined game.
+*   Users drag and drop `MomentCard` components to arrange them chronologically.
+*   Detailed scoring with visual feedback integrated into the `MomentCard`.
+*   Scores are saved to the user's profile.
+*   Includes a "Challenge This Moment" button (available after results are shown).
+
+## Key Components
+
+*   **`MomentCard` (`src/components/MomentCard.tsx`):**
+    *   Displays individual game moments (context, question, options if applicable).
+    *   Handles different states: active question, revealed answer, shuffle item.
+    *   Shows importance score with color-coded feedback (Low/Medium/High) and tooltip explanation when revealed.
+    *   Shows challenge button when appropriate.
+    *   Styling adapts based on props (e.g., `isRevealed`, `isDraggable`, `resultStatus`).
+*   **`ChallengeModal` (`src/components/ChallengeModal.tsx`):**
+    *   Provides a modal interface for users to submit feedback on moments.
+    *   Uses Headless UI for accessibility and transitions.
+
+## AI Importance Score
+
+*   Displayed on `MomentCard` components after a moment is revealed (in Daily Challenge and Rewind modes).
+*   Provides a score (0.0-10.0) indicating the AI's assessment of the moment's significance.
+*   Uses color-coding (Gray=Low, Yellow=Medium, Red=High) for quick visual assessment.
+*   Includes a tooltip explaining the score is based on factors like win probability swing, game context, and momentum.
+*   This score is primarily for user insight and does not currently affect gameplay scoring (except potentially as a bonus in Shuffle mode).
+
+## Challenge Feature
+
+*   Users can click "Challenge This Moment" on any `MomentCard` (if logged in).
+*   The `ChallengeModal` appears, allowing selection of a reason and an optional comment.
+*   Submissions are sent via the `/api/submitChallenge` endpoint.
+*   Challenge data is stored in the `challenges` table in Supabase.
+*   Feedback does not affect the current game score.
+
+## Leaderboard (/leaderboard)
+*   Fetches top scores (currently top 20) for each game mode (Daily, Rewind, Shuffle) via the `/api/getLeaderboard` endpoint.
+*   Uses tabs to switch between modes.
+*   Displays rank, user (anonymized email or partial user ID), score, game/date context, and time of submission.
+*   Accessible to all users (public route).
+
+## Tech Stack
+
+*   **Framework:** Next.js (App Router)
+*   **Database:** Supabase (PostgreSQL)
+*   **Authentication:** Supabase Auth
+*   **Styling:** Tailwind CSS, Headless UI
+*   **AI Integration:** OpenAI API (GPT-4o)
+*   **Drag & Drop:** @hello-pangea/dnd
+*   **Notifications:** react-hot-toast
+*   **Date Formatting:** date-fns
 
 ## Getting Started
 
@@ -30,7 +111,13 @@ This is a Next.js project bootstrapped with [`create-next-app`](https://github.c
    ```
    Replace `YOUR_SUPABASE_URL` and `YOUR_SUPABASE_ANON_KEY` with your actual Supabase project URL and anon key.
 
-4. Run the development server:
+4. Set up Supabase: Create a project, get API URL and anon key. Run the SQL scripts in `/sql` (e.g., `create_scores_table.sql`, `create_challenges_table.sql`) via the Supabase SQL Editor.
+
+5. Set up OpenAI: Get an API key.
+
+6. Create a `.env.local` file (copy from `.env.example`) and add your Supabase/OpenAI credentials.
+
+7. Run the development server:
    ```bash
    npm run dev
    ```
@@ -81,6 +168,19 @@ The homepage (`/`) serves as the main entry point:
     - **Summary:** Shows final score, correct/skipped count, and missed high-importance moments.
     - **Score Saving:** If logged in, the final score and game breakdown are saved via `/api/saveRewindScore` upon completion.
 
+### Shuffle Mode (/shuffle)
+
+- **Data Fetching:** Fetches game data (currently hardcoded to Rutgers vs. Louisville 2006) via `/api/fetchGame`.
+- **Gameplay:**
+  - Extracts key moments (specifically the `context`) from the fetched data.
+  - Randomizes the order of these moments.
+  - Presents the moments in a list allowing drag-and-drop reordering (using `@hello-pangea/dnd`).
+- **Submission:**
+  - A "Submit Order" button becomes active after the user has reordered items.
+  - Clicking submit compares the user's order to the original chronological order (based on moment `index`).
+  - Displays the results locally (how many were placed correctly) and calculates a score.
+  - *Note: Score saving for Shuffle Mode is not yet implemented.*
+
 ### API Routes
 
 - **`/api/getDailyChallenge` (GET):**
@@ -110,36 +210,9 @@ The homepage (`/`) serves as the main entry point:
   - Accepts `{ gameId: string, score: number, totalMoments: number, skipped: number, correct: number }` in the request body.
   - Requires user to be authenticated.
   - Validates input and inserts the score and metadata into the `scores` table with `mode = 'rewind'`.
-
-### Authentication
-
-This project uses Supabase Auth for email/password authentication.
-
-- Visit `/login` to sign up or log in.
-- The `/dashboard` route is protected and requires authentication.
-- The `/daily`, `/rewind`, and `/rewind/play` routes are public.
-- Session management is handled via context and middleware.
-- Ensure you have enabled the Email provider in your Supabase project settings.
-
-### Database Schema
-
-The initial database schema includes tables for `scores`, `challenges`, and `game_cache`.
-
-- **Schema Definition:** The SQL script to create these tables and their basic Row Level Security (RLS) policies is located in `sql/init-schema.sql`.
-- **Applying the Schema:** Run the contents of `sql/init-schema.sql` in your Supabase project's SQL Editor (Database -> SQL Editor) to set up the tables.
-- **RLS Policies:** Basic RLS policies are included to allow users to manage their own scores and challenges. Access to `game_cache` is initially restricted. Adjust policies as needed for your application's security requirements.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- **`/api/saveShuffleScore` (POST):**
+  - Accepts `{ gameId: string, score: number, totalMoments: number, correctPositions: number[], bonusEarned: number }` in the request body.
+  - Requires user to be authenticated.
+  - Validates input and inserts the score and metadata into the `scores` table with `mode = 'shuffle'`.
+- **`/api/submitChallenge` (POST):**
+  - Accepts `

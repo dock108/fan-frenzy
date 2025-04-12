@@ -17,7 +17,7 @@ export default function Header() {
     <header className="bg-gray-800 text-white p-4">
       <nav className="container mx-auto flex justify-between items-center">
         <Link href="/" className="text-xl font-bold hover:text-gray-300">
-          SpoilSports
+          FanFrenzy
         </Link>
         <div className="space-x-4">
           {loading ? (
@@ -33,6 +33,12 @@ export default function Header() {
               <Link href="/rewind" className="hover:text-gray-300">
                  Rewind
               </Link>
+              <Link href="/shuffle" className="hover:text-gray-300">
+                 Shuffle
+              </Link>
+              <Link href="/leaderboard" className="hover:text-gray-300">
+                Leaderboard
+              </Link>
               <button
                 onClick={handleSignOut}
                 className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
@@ -47,6 +53,12 @@ export default function Header() {
               </Link>
                <Link href="/rewind" className="hover:text-gray-300">
                  Rewind
+              </Link>
+              <Link href="/shuffle" className="hover:text-gray-300">
+                 Shuffle
+              </Link>
+              <Link href="/leaderboard" className="hover:text-gray-300">
+                Leaderboard
               </Link>
               <Link href="/login" className="hover:text-gray-300">
                 Login / Sign Up

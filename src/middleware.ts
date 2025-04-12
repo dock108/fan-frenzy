@@ -58,7 +58,7 @@ export async function middleware(request: NextRequest) {
   const protectedRoutes = ['/dashboard']
 
   // Define public routes (accessible without login, beyond the defaults like /, /login)
-  const publicRoutes = ['/daily', '/rewind', '/rewind/play']
+  const publicRoutes = ['/daily', '/rewind', '/rewind/play', '/shuffle', '/leaderboard']
 
   const path = request.nextUrl.pathname
 
