@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import TransitionLayout from '@/components/layout/TransitionLayout'
 import { ArrowPathIcon, CalendarDaysIcon } from '@heroicons/react/24/solid'
-import ThemeToggle from '@/components/ThemeToggle'
 
 interface GameData {
   gameId: string;
@@ -68,10 +67,6 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-br from-yellow-100 via-amber-50 to-yellow-100 dark:from-gray-800 dark:via-gray-900 dark:to-black z-0">
           <div className="absolute inset-0 bg-[url('/images/subtle-texture.png')] opacity-10 dark:opacity-5"></div>
           <div className="absolute inset-0 bg-gradient-to-b from-white/50 dark:from-black/50 to-transparent"></div>
-        </div>
-        
-        <div className="absolute top-4 right-4 z-20">
-          <ThemeToggle />
         </div>
         
         <div className="relative z-10 max-w-xl">
