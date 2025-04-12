@@ -167,9 +167,10 @@ function DailyChallengeContent() {
       <div className="lg:grid lg:grid-cols-3 lg:gap-6">
         {/* Game Component Area */}
         <div className="lg:col-span-2">
-          <DailyOrderingGame 
+          <DailyOrderingGame
             key={challengeData.id} // Use challenge ID as key
-            questions={challengeData.questions} 
+            gameId={challengeData.id} // Pass challenge ID as gameId prop
+            questions={challengeData.questions}
             title={challengeData.title} // Pass title to game component IF needed by modal
           />
         </div>
