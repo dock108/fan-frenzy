@@ -37,6 +37,15 @@ This is a Next.js project bootstrapped with [`create-next-app`](https://github.c
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+### Authentication
+
+This project uses Supabase Auth for email/password authentication.
+
+- Visit `/login` to sign up or log in.
+- The `/dashboard` route is protected and requires authentication.
+- Session management is handled via context and middleware.
+- Ensure you have enabled the Email provider in your Supabase project settings.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
