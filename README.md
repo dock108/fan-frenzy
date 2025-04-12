@@ -75,7 +75,10 @@ The homepage (`/`) serves as the main entry point:
 - **Gameplay (`/rewind/play?team=...&year=...&gameId=...`):**
     - Navigated to when a user selects a game from the list.
     - Fetches detailed game data (event summary, key moments) via `/api/fetchGame`.
-    - Currently displays fetched data structure as a placeholder for actual gameplay UI.
+    - **Gameplay:** Presents a series of multiple-choice questions based on the fetched `key_moments`.
+      - Users select an answer, reveal the correct one + explanation, and see the importance score.
+      - Includes a "Skip" option with partial scoring.
+    - **Summary:** Shows final score, correct/skipped count, and missed high-importance moments.
 
 ### API Routes
 
@@ -99,7 +102,7 @@ The homepage (`/`) serves as the main entry point:
   - If not cached:
     - **AI Generation:** Calls OpenAI (GPT-4o) twice:
         1.  To generate a play-by-play summary for the specified game.
-        2.  To extract `key_moments` from the generated PBP.
+        2.  To extract multiple-choice `key_moments` from the generated PBP.
     - Inserts the generated data (`event_data` including PBP, `key_moments`) into `game_cache` (requires `SUPABASE_SERVICE_ROLE_KEY`).
     - Returns the generated data.
 

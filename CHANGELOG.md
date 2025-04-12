@@ -23,8 +23,10 @@ All notable changes to this project will be documented in this file.
 - Added placeholder page for Team Rewind gameplay (`/rewind/play`).
 - Added API route `/api/fetchGame` with Supabase caching logic (using mock data for misses).
 - Integrated OpenAI API (GPT-4o) into `/api/fetchGame` to generate key moments from placeholder PBP on cache miss.
+- Implemented Team Rewind gameplay UI (`/rewind/play`) with multiple-choice format using data from `/api/fetchGame`.
 
 ### Changed
+- Refactored `/api/fetchGame`'s AI moment generation to output multiple-choice format instead of fill-in-the-blanks.
 - Modified `/api/fetchGame` to use OpenAI for *both* PBP generation and key moment extraction on cache miss.
 - Updated Daily Challenge page to call `/api/saveScore` on completion for logged-in users.
 - Refactored Daily Challenge page (`/daily`) to fetch data from API instead of direct import.

@@ -22,10 +22,10 @@ const openai = new OpenAI({
 });
 
 // Define expected data structures (can be shared with frontend types)
-interface MomentBase { index: number; type: 'start' | 'fill-in' | 'end'; }
+interface MomentBase { index: number; type: 'start' | 'mc' | 'end'; }
 interface StartEndMoment extends MomentBase { type: 'start' | 'end'; context: string; }
-interface FillInMoment extends MomentBase { type: 'fill-in'; prompt: string; answer: string; importance: number; }
-type Moment = StartEndMoment | FillInMoment;
+interface MultipleChoiceMoment extends MomentBase { type: 'mc'; context: string; question: string; options: string[]; answer: number; explanation: string; importance: number; }
+type Moment = StartEndMoment | MultipleChoiceMoment;
 interface GameData {
     event_data: any; // Placeholder for scraped/API data or AI summary
     key_moments: Moment[];
@@ -124,40 +124,48 @@ Focus on the sequence of plays that led to the final outcome. Include scores cha
         if (error.response) {
             console.error("[AI PBP Gen] OpenAI Error Response:", error.response.data);
         }
-        // Return a fallback message instead of throwing, allowing moment generation to try with limited info
-        // Or potentially throw here if PBP is absolutely required
-        // throw new Error(`AI PBP generation failed: ${error.message}`);
         return `Error generating play-by-play for ${gameTitle}. Proceeding with moment generation based on title only.`;
     }
 }
 
-// --- Function to Process Data with OpenAI --- 
+// --- Function to Generate Key Moments (Now Multiple Choice) --- 
 async function generateKeyMomentsWithAI(playByPlayText: string, gameTitle: string): Promise<GameData> {
-    console.log("[AI Moments Gen] Sending request to OpenAI GPT-4o...");
+    console.log("[AI MC Moments Gen] Sending request to OpenAI GPT-4o...");
+    // UPDATED System Prompt for Multiple Choice
     const systemPrompt = `
-You are an expert sports analyst. Given the following play-by-play text for a game, identify exactly 8-10 key moments that represent the critical narrative flow of the game's ending sequence. Structure these moments as a JSON object matching the specified GameData interface. 
+You are an expert sports analyst. Given the following play-by-play text for a game, identify exactly 5-7 key moments. Structure these moments as a JSON object matching the specified GameData interface.
 
 Requirements:
-1.  The FIRST moment MUST have type "start" and provide context for the beginning of the key sequence.
-2.  The LAST moment MUST have type "end" and provide context for the conclusion of the sequence.
-3.  ALL moments BETWEEN start and end MUST have type "fill-in".
-4.  Each "fill-in" moment needs:
-    *   A "prompt" (string): A clear question asking the user to recall a specific detail (player, play type, result, decision etc.) from that moment in the provided text.
-    *   An "answer" (string): The concise, correct answer to the prompt, directly derivable from the text.
-    *   An "importance" (number): A score from 0.0 to 10.0 indicating how crucial this moment was to the game's outcome (use decimals).
-5.  Assign sequential "index" numbers starting from 0.
-6.  The entire output must be a single valid JSON object containing an "event_data" object (can be simple like {"summary": "AI processed"}) and a "key_moments" array.
+1.  Each moment MUST have type "mc" (multiple choice).
+2.  Each moment needs:
+    *   "index" (number): Sequential, starting from 0.
+    *   "type" (string): Set to "mc".
+    *   "context" (string): Text describing the game situation *before* the key event happens.
+    *   "question" (string): A clear multiple-choice question about the *next key event* based on the context and play-by-play.
+    *   "options" (array of strings): Exactly 4 plausible options. One must be the correct answer derived from the text.
+    *   "answer" (number): The 0-based index of the correct option in the "options" array.
+    *   "explanation" (string): A brief explanation of why the answer is correct, citing the play-by-play.
+    *   "importance" (number): A score from 0.0 to 10.0 indicating how crucial this moment was (use decimals).
+3.  The entire output must be a single valid JSON object containing an "event_data" object (e.g., {"summary": "AI processed"}) and a "key_moments" array containing only "mc" type moments.
 
-Example Fill-In Moment:
+Example MC Moment:
 {
   "index": 1,
-  "type": "fill-in",
-  "prompt": "Who caught the pass setting up 1st & Goal?",
-  "answer": "Tiquan Underwood",
-  "importance": 9.2
+  "type": "mc",
+  "context": "Runner on 1st, 0 outs. Bill Mueller batting.",
+  "question": "What does Dave Roberts famously do next?",
+  "options": [
+    "Gets picked off",
+    "Steals second base",
+    "Advances on a wild pitch",
+    "Gets thrown out stealing"
+  ],
+  "answer": 1,
+  "explanation": "Dave Roberts steals second base, putting the tying run in scoring position.",
+  "importance": 9.8
 }
 
-Strictly adhere to the JSON structure and types. Ensure the prompts are questions and answers are concise facts from the text. If the provided Play-by-Play Text indicates an error during its generation, generate the best possible moments based on the game title alone.
+Strictly adhere to the JSON structure and types. Generate exactly 4 options for each question.
 `;
 
     try {
@@ -165,35 +173,36 @@ Strictly adhere to the JSON structure and types. Ensure the prompts are question
             model: "gpt-4o",
             messages: [
                 { role: "system", content: systemPrompt },
-                { role: "user", content: `Generate key moments for game: ${gameTitle}
+                { role: "user", content: `Generate multiple choice key moments for game: ${gameTitle}
 
 Play-by-Play Text:
 ${playByPlayText}` }
             ],
             response_format: { type: "json_object" },
-            temperature: 0.2,
+            temperature: 0.5, // Slightly higher temp might help option generation
         });
 
         const jsonResponse = completion.choices[0]?.message?.content;
-        if (!jsonResponse) throw new Error('OpenAI moments response content is missing.');
+        if (!jsonResponse) throw new Error('OpenAI MC moments response content is missing.');
 
-        console.log("[AI Moments Gen] Received response from OpenAI.");
+        console.log("[AI MC Moments Gen] Received response from OpenAI.");
         const parsedData = JSON.parse(jsonResponse);
 
         if (!parsedData.key_moments || !Array.isArray(parsedData.key_moments)) {
             throw new Error('Invalid JSON structure from AI: key_moments missing/invalid.');
         }
+        // Add more validation here if needed (e.g., check moment types, options array length)
         if (!parsedData.event_data) {
              parsedData.event_data = { summary: "AI processed summary" };
         }
 
-        console.log("[AI Moments Gen] Successfully parsed AI response.");
+        console.log("[AI MC Moments Gen] Successfully parsed AI response.");
         return parsedData as GameData;
 
     } catch (error: any) {
-        console.error("[AI Moments Gen] Error during OpenAI call or parsing:", error);
-        if (error.response) console.error("[AI Moments Gen] OpenAI Error Response:", error.response.data);
-        throw new Error(`AI moments generation failed: ${error.message}`);
+        console.error("[AI MC Moments Gen] Error during OpenAI call or parsing:", error);
+        if (error.response) console.error("[AI MC Moments Gen] OpenAI Error Response:", error.response.data);
+        throw new Error(`AI MC moments generation failed: ${error.message}`);
     }
 }
 
@@ -231,41 +240,43 @@ export async function GET(request: NextRequest) {
             throw new Error(`Database error checking cache: ${cacheError.message}`);
         }
 
-        if (cachedGame?.event_data && cachedGame?.key_moments) {
-            console.log(`[API Fetch Game] Cache hit for ${gameId}. Returning cached data.`);
+        // Check if cached data looks like the new MC format (simple check on first moment type)
+        const firstMoment = cachedGame?.key_moments?.[0];
+        if (cachedGame?.event_data && cachedGame?.key_moments && firstMoment?.type === 'mc') {
+            console.log(`[API Fetch Game] Cache hit (MC Format) for ${gameId}. Returning cached data.`);
             return NextResponse.json(cachedGame as GameData);
+        } else if (cachedGame) {
+             console.log(`[API Fetch Game] Cache hit for ${gameId}, but data is old format or invalid. Re-fetching.`);
+             // Optional: Delete the old cache entry here?
         }
 
-        // 2. Cache Miss: Generate PBP with AI, then Generate Moments with AI
-        console.log(`[API Fetch Game] Cache miss for ${gameId}. Generating PBP and moments with AI.`);
-        const gameTitle = `${team} ${year} - ${gameId}`; // Simple title for AI context
+        // 2. Cache Miss or Old Format: Generate PBP and Moments
+        console.log(`[API Fetch Game] Cache miss or old format for ${gameId}. Generating PBP and MC moments with AI.`);
+        const gameTitle = `${team} ${year} - ${gameId}`;
         
-        // Step 2a: Generate Play-by-Play text using AI
         const playByPlayText = await generatePlayByPlayWithAI(team, year, gameId, gameTitle);
-        
-        // Step 2b: Generate Key Moments based on the (potentially AI-generated) PBP
         const processedGameData = await generateKeyMomentsWithAI(playByPlayText, gameTitle);
         
-        // Add the generated PBP text to event_data for potential display/debugging
         if (!processedGameData.event_data) processedGameData.event_data = {};
         processedGameData.event_data.ai_generated_pbp = playByPlayText;
 
-        // 3. Insert into Cache
-        console.log(`[API Fetch Game] Inserting AI-generated data into cache for ${gameId}.`);
-        const { error: insertError } = await supabaseAdmin
+        // 3. Insert/Upsert into Cache
+        console.log(`[API Fetch Game] Upserting AI-generated MC data into cache for ${gameId}.`);
+        // Use upsert to overwrite old format if it existed
+        const { error: upsertError } = await supabaseAdmin
             .from('game_cache')
-            .insert({
+            .upsert({
                 source_game_id: gameId,
-                source_api: 'openai-gpt-4o-pbp-moments-v1', // Indicate full AI source
-                league: 'Unknown/AI', // TODO: Maybe ask AI for league?
-                event_data: processedGameData.event_data, // Includes PBP text now
+                source_api: 'openai-gpt-4o-pbp-mc-moments-v1', // Updated source ID
+                league: 'Unknown/AI',
+                event_data: processedGameData.event_data,
                 key_moments: processedGameData.key_moments,
                 fetched_at: new Date().toISOString(),
-                needs_review: true // AI-generated data definitely needs review
-            });
+                needs_review: true
+            }, { onConflict: 'source_game_id' }); // Upsert based on gameId
 
-        if (insertError) {
-            console.error('[API Fetch Game] Cache insert error:', insertError);
+        if (upsertError) {
+            console.error('[API Fetch Game] Cache upsert error:', upsertError);
             // Return data even if cache insert fails
         }
 
