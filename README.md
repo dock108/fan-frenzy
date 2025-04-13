@@ -26,7 +26,7 @@ This is a Next.js project bootstrapped with [`create-next-app`](https://github.c
 ## Gameplay Modes
 
 ### Daily Challenge
-*   Fetches a unique game based on the current date.
+*   Fetches a unique game based on activation timestamps defined in the game data (`dailyChallenges.json`). The currently active challenge is the one with the latest activation time that is in the past (typically changes daily at 3 AM Eastern Time).
 *   Presents key moments using the `MomentCard` component.
 *   Scores are saved to the user's profile.
 *   Includes a "Challenge This Moment" button for feedback.

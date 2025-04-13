@@ -1,6 +1,7 @@
 [
   {
-    "id": "2025-04-12",
+    "id": "2025-04-13",
+    "activationTimeISO": "2025-04-13T03:00:00-04:00",
     "title": "Rutgers vs. Purdue (2021) – Harper Jr. Stuns the #1 Team",
     "mode": "order",
     "meta": {
@@ -12,7 +13,7 @@
       {
         "index": 0,
         "type": "start",
-        "context": "The top-ranked team in the country rolls into Jersey Mike’s Arena for a Big Ten battle, but Rutgers comes out swinging."
+        "context": "The top-ranked team in the country rolls into Jersey Mike's Arena for a Big Ten battle, but Rutgers comes out swinging."
       },
       {
         "index": 1,
@@ -77,12 +78,13 @@
       {
         "index": 11,
         "type": "end",
-        "context": "The building erupts as the home team takes down the nation’s #1 on a walk-off buzzer beater."
+        "context": "The building erupts as the home team takes down the nation's #1 on a walk-off buzzer beater."
       }
     ]
   },
   {
-    "id": "2026-04-12",
+    "id": "2025-05-12",
+    "activationTimeISO": "2025-05-12T03:00:00-04:00",
     "title": "Rams vs. Chiefs MNF Shootout (2018)",
     "mode": "order",
     "meta": {
@@ -147,6 +149,7 @@
   },
   {
     "id": "2025-04-13",
+    "activationTimeISO": "2025-04-13T03:00:00-04:00",
     "title": "Colts vs. Patriots '4th & 2' Game (2009)",
     "mode": "order",
     "meta": {
@@ -205,6 +208,7 @@
   },
   {
     "id": "2025-04-14",
+    "activationTimeISO": "2025-04-14T03:00:00-04:00",
     "title": "Vikings vs. Saints Wild Card OT (2020)",
     "mode": "order",
     "meta": {
@@ -263,6 +267,7 @@
   },
   {
     "id": "2025-04-15",
+    "activationTimeISO": "2025-04-15T03:00:00-04:00",
     "title": "Jets vs. Browns (Mayfield Debut Comeback) (2018)",
     "mode": "order",
     "meta": {
@@ -315,6 +320,7 @@
   },
   {
     "id": "2025-04-16",
+    "activationTimeISO": "2025-04-16T03:00:00-04:00",
     "title": "Packers vs. Cowboys Divisional (Cook Toe-Tap) (2017)",
     "mode": "order",
     "meta": {
@@ -367,6 +373,7 @@
   },
   {
     "id": "2025-04-17",
+    "activationTimeISO": "2025-04-17T03:00:00-04:00",
     "title": "USA vs. Algeria World Cup (Donovan Goal) (2010)",
     "mode": "order",
     "meta": {
@@ -419,6 +426,7 @@
   },
   {
     "id": "2025-04-18",
+    "activationTimeISO": "2025-04-18T03:00:00-04:00",
     "title": "France vs. Argentina (2018) – World Cup Knockout Classic",
     "mode": "order",
     "meta": {
@@ -477,6 +485,7 @@
   },
   {
     "id": "2025-04-19",
+    "activationTimeISO": "2025-04-19T03:00:00-04:00",
     "title": "Croatia vs. Russia (2018) – Extra Time and Penalty Drama",
     "mode": "order",
     "meta": {
@@ -535,7 +544,8 @@
   },
   {
     "id": "2025-04-20",
-    "title": "Portugal vs. Spain (2018) – Ronaldo’s Hat Trick",
+    "activationTimeISO": "2025-04-20T03:00:00-04:00",
+    "title": "Portugal vs. Spain (2018) – Ronaldo's Hat Trick",
     "mode": "order",
     "meta": {
       "event_date": "2018-06-15",
@@ -593,6 +603,7 @@
   },
   {
     "id": "2025-04-21",
+    "activationTimeISO": "2025-04-21T03:00:00-04:00",
     "title": "Giants vs. Reds NLDS Game 5 (2012) – Series-Clinching Finish",
     "mode": "order",
     "meta": {
@@ -644,6 +655,7 @@
   },
   {
     "id": "2025-04-22",
+    "activationTimeISO": "2025-04-22T03:00:00-04:00",
     "title": "Kings vs. Blackhawks WCF Game 7 OT (2014)",
     "mode": "order",
     "questions": [
@@ -658,6 +670,7 @@
   },
   {
     "id": "2025-04-23",
+    "activationTimeISO": "2025-04-23T03:00:00-04:00",
     "title": "Blue Jackets Sweep Lightning Game 1 Comeback (2019)",
     "mode": "order",
     "questions": [
@@ -671,6 +684,7 @@
   },
   {
     "id": "2025-04-24",
+    "activationTimeISO": "2025-04-24T03:00:00-04:00",
     "title": "Penguins vs. Flyers Game 3 Fight-Fest (2012)",
     "mode": "order",
     "questions": [
@@ -684,6 +698,7 @@
   },
   {
     "id": "2025-04-25",
+    "activationTimeISO": "2025-04-25T03:00:00-04:00",
     "title": "Flames vs. Oilers Battle of Alberta (2022)",
     "mode": "order",
     "questions": [
@@ -697,6 +712,7 @@
   },
   {
     "id": "2025-04-26",
+    "activationTimeISO": "2025-04-26T03:00:00-04:00",
     "title": "Golden Knights vs. Sharks Game 7 Collapse (2019)",
     "mode": "order",
     "questions": [
@@ -711,6 +727,7 @@
   },
   {
     "id": "2025-04-27",
+    "activationTimeISO": "2025-04-27T03:00:00-04:00",
     "title": "Yankees vs. Twins ALDS Game 2 Meltdown (2004)",
     "mode": "order",
     "questions": [
@@ -724,6 +741,7 @@
   },
   {
     "id": "2025-04-28",
+    "activationTimeISO": "2025-04-28T03:00:00-04:00",
     "title": "Giants vs. Reds NLDS Game 5 Comeback (2012)",
     "mode": "order",
     "questions": [
@@ -737,6 +755,7 @@
   },
   {
     "id": "2025-04-29",
+    "activationTimeISO": "2025-04-29T03:00:00-04:00",
     "title": "Mariners vs. Yankees (Ichiro Inside-the-Park HR) (2007)",
     "mode": "order",
     "questions": [
@@ -749,6 +768,7 @@
   },
   {
     "id": "2025-04-30",
+    "activationTimeISO": "2025-04-30T03:00:00-04:00",
     "title": "Red Sox vs. Rays ALCS Game 5 Comeback (2008)",
     "mode": "order",
     "questions": [
@@ -762,6 +782,7 @@
   },
   {
     "id": "2025-05-01",
+    "activationTimeISO": "2025-05-01T03:00:00-04:00",
     "title": "Rangers vs. Blue Jays ALDS Game 5 (Bat Flip) (2015)",
     "mode": "order",
     "questions": [
@@ -775,6 +796,7 @@
   },
   {
     "id": "2025-05-02",
+    "activationTimeISO": "2025-05-02T03:00:00-04:00",
     "title": "Kansas vs. Memphis NCAA Title Game (2008)",
     "mode": "order",
     "questions": [
@@ -789,6 +811,7 @@
   },
   {
     "id": "2025-05-03",
+    "activationTimeISO": "2025-05-03T03:00:00-04:00",
     "title": "Gonzaga vs. UCLA Final Four (2021)",
     "mode": "order",
     "questions": [
@@ -802,6 +825,7 @@
   },
   {
     "id": "2025-05-04",
+    "activationTimeISO": "2025-05-04T03:00:00-04:00",
     "title": "Florida Gulf Coast vs. Georgetown (Dunk City) (2013)",
     "mode": "order",
     "questions": [
@@ -815,6 +839,7 @@
   },
   {
     "id": "2025-05-05",
+    "activationTimeISO": "2025-05-05T03:00:00-04:00",
     "title": "Syracuse vs. Virginia Elite Eight Comeback (2016)",
     "mode": "order",
     "questions": [
@@ -828,12 +853,13 @@
   },
   {
     "id": "2025-05-06",
+    "activationTimeISO": "2025-05-06T03:00:00-04:00",
     "title": "VCU vs. Kansas Elite Eight Upset (2011)",
     "mode": "order",
     "questions": [
       { "index": 0, "type": "start", "context": "VCU continues Cinderella run vs. #1 seed Kansas." },
       { "index": 1, "type": "moment", "text": "VCU hits early threes to build double-digit lead", "importance": 8 },
-      { "index": 2, "type": "moment", "text": "Kansas cuts deficit but can’t tie it", "importance": 8.5 },
+      { "index": 2, "type": "moment", "text": "Kansas cuts deficit but can't tie it", "importance": 8.5 },
       { "index": 3, "type": "moment", "text": "VCU holds Kansas to 2-for-21 from three", "importance": 9 },
       { "index": 4, "type": "moment", "text": "Final steal and dunk seals game", "importance": 9.5 },
       { "index": 5, "type": "end", "context": "VCU reaches Final Four as an 11-seed with 71-61 win." }
@@ -841,6 +867,7 @@
   },
   {
     "id": "2025-05-07",
+    "activationTimeISO": "2025-05-07T03:00:00-04:00",
     "title": "Auburn vs. Georgia (Prayer at Jordan-Hare) (2013)",
     "mode": "order",
     "questions": [
@@ -848,12 +875,13 @@
       { "index": 1, "type": "moment", "text": "Auburn dominates early and builds big lead", "importance": 7 },
       { "index": 2, "type": "moment", "text": "Georgia scores 21 unanswered in 4th to take lead", "importance": 9 },
       { "index": 3, "type": "moment", "text": "Auburn faces 4th & 18 from their own 27", "importance": 9.5 },
-      { "index": 4, "type": "moment", "text": "Marshall’s pass deflects off two defenders into WR's hands", "importance": 10 },
+      { "index": 4, "type": "moment", "text": "Marshall's pass deflects off two defenders into WR's hands", "importance": 10 },
       { "index": 5, "type": "end", "context": "Auburn wins 43-38 on one of the wildest Hail Marys ever." }
     ]
   },
   {
     "id": "2025-05-08",
+    "activationTimeISO": "2025-05-08T03:00:00-04:00",
     "title": "Texas Tech vs. Texas (Crabtree TD) (2008)",
     "mode": "order",
     "questions": [
@@ -867,6 +895,7 @@
   },
   {
     "id": "2025-05-09",
+    "activationTimeISO": "2025-05-09T03:00:00-04:00",
     "title": "LSU vs. Texas A&M 7OT Game (2018)",
     "mode": "order",
     "questions": [
@@ -880,6 +909,7 @@
   },
   {
     "id": "2025-05-10",
+    "activationTimeISO": "2025-05-10T03:00:00-04:00",
     "title": "Boise State vs. Oklahoma Fiesta Bowl (2007)",
     "mode": "order",
     "questions": [
@@ -893,6 +923,7 @@
   },
   {
     "id": "2025-05-11",
+    "activationTimeISO": "2025-05-11T03:00:00-04:00",
     "title": "Michigan State vs. Michigan Punt Mishap (2015)",
     "mode": "order",
     "questions": [
